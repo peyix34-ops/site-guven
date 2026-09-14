@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bu Site Güvenli mi? | Web Security Analysis</title>
+<style>
+  :root {
+    --bg: #0a0d10;
+    --panel: #0e1318;
+    --line: #1c242c;
+    --text: #dbe4ea;
+    --dim: #5c6975;
+    --mint: #3ecf8e;
+    --amber: #d9a441;
+    --danger: #e0605c;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+
+  .brand {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand .bar { width: 4px; background: var(--mint); border-radius: 2px; }
+  .brand h1 { font-size: 15px; margin: 2px 0 3px; letter-spacing: 0.02em; }
+  .brand .sub {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+
+  .eyebrow {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--mint);
+    margin-bottom: 10px;
+  }
+
+  .hero h2 {
+    font-size: 28px;
+    line-height: 1.15;
+    margin: 0 0 12px;
+    font-weight: 700;
+  }
+  .hero p {
+    color: var(--dim);
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0 0 18px;
+  }
+  .field-label {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  #url {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 13px 14px;
+    color: var(--text);
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 13px;
+    outline: none;
+    margin-bottom: 12px;
+  }
+  #url::placeholder { color: var(--dim); }
+  #url:focus { border-color: var(--mint); }
+
+  .btn {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    padding: 13px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    font-family: ui-monospace, Menlo, monospace;
+  }
+  .btn-start { background: var(--mint); color: #04140d; margin-bottom: 8px; }
+  .btn-start:disabled { opacity: 0.4; }
+  .btn-stop { background: transparent; border: 1px solid var(--line); color: var(--dim); }
+
+  .agent-grid {
+    display: flex;
+    justify-content: space-between;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .agent-grid .val { color: var(--text); font-size: 12px; margin-top: 4px; }
+
+  .radar-wrap { display: flex; justify-content: center; margin: 18px 0 4px; }
+  .radar {
+    position: relative;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #0b1712 0%, #0a0d10 72%);
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .ring { position: absolute; border: 1px solid rgba(62,207,142,0.14); border-radius: 50%; }
+  .ring.r1 { inset: 18%; } .ring.r2 { inset: 36%; } .ring.r3 { inset: 54%; }
+  .cross { position: absolute; background: rgba(62,207,142,0.14); }
+  .cross.h { top: 50%; left: 0; right: 0; height: 1px; }
+  .cross.v { left: 50%; top: 0; bottom: 0; width: 1px; }
+  .needle {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 50%; height: 1px;
+    background: linear-gradient(90deg, var(--mint), transparent);
+    transform-origin: 0% 50%;
+    animation: sweep 3.6s linear infinite;
+  }
+  @keyframes sweep { to { transform: rotate(360deg); } }
+  .center-dot {
+    position: absolute; top: 50%; left: 50%;
+    width: 8px; height: 8px; margin: -4px;
+    border-radius: 50%; background: var(--mint);
+    box-shadow: 0 0 10px var(--mint);
+  }
+
+  .elapsed { text-align: center; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--dim); margin-top: 10px; }
+  .elapsed b { color: var(--text); }
+
+  .pipeline-pct { font-family: ui-monospace, Menlo, monospace; font-size: 30px; color: var(--mint); margin: 6px 0 12px; }
+  .bar-track { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-bottom: 10px; }
+  .bar-fill { height: 100%; width: 0%; background: var(--mint); transition: width 0.4s ease; }
+  .status-line { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--dim); margin-bottom: 14px; }
+  .stages { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stage {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 9px 10px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--dim);
+  }
+  .stage.active { border-color: var(--mint); color: var(--mint); }
+  .stage.done { color: var(--text); }
+  .stage.done::after { content: " ✓"; color: var(--mint); }
+
+  .term-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .term-hdr .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); animation: blink 1.4s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity: 0.2; } }
+  .term-hdr span { font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: var(--dim); letter-spacing: 0.08em; }
+  #terminal {
+    background: #06090b;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11.5px;
+    line-height: 1.9;
+    min-height: 90px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  #terminal .l { color: var(--dim); }
+  #terminal .l .tag { color: var(--mint); }
+  #terminal .l.warn .tag { color: var(--amber); }
+  #terminal .l.bad .tag { color: var(--danger); }
+
+  h3.section-title { font-size: 17px; margin: 4px 0 12px; font-weight: 700; }
+  .modules { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .module {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .module.active { border-color: var(--mint); }
+  .module .mrow { display: flex; justify-content: space-between; font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: var(--dim); margin-bottom: 10px; }
+  .module .mstatus { letter-spacing: 0.06em; }
+  .module .mstatus.done { color: var(--mint); }
+  .module .mstatus.active { color: var(--amber); }
+  .module h4 { font-size: 15px; margin: 0 0 4px; }
+  .module p { font-size: 12px; color: var(--dim); margin: 0; }
+  .module .result { margin-top: 10px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--text); }
+
+  .score-row { display: flex; align-items: baseline; gap: 10px; margin: 10px 0 6px; }
+  .score-num { font-family: ui-monospace, Menlo, monospace; font-size: 46px; font-weight: 700; color: var(--mint); }
+  .score-den { font-family: ui-monospace, Menlo, monospace; font-size: 16px; color: var(--dim); }
+  .score-label { font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: var(--dim); letter-spacing: 0.08em; margin-bottom: 4px; }
+  .verdict-badge {
+    display: inline-block;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    margin-top: 8px;
+    color: var(--dim);
+  }
+  .verdict-badge.ok { border-color: var(--mint); color: var(--mint); }
+  .verdict-badge.mid { border-color: var(--amber); color: var(--amber); }
+  .verdict-badge.bad { border-color: var(--danger); color: var(--danger); }
+
+  .reco { margin-top: 16px; }
+  .reco .eyebrow { margin-bottom: 8px; }
+  .reco ul { margin: 0; padding-left: 18px; font-size: 12px; color: var(--dim); line-height: 1.7; }
+
+  .disclaimer {
+    font-size: 11px;
+    color: var(--dim);
+    line-height: 1.6;
+  }
+  .disclaimer .eyebrow { color: var(--amber); }
+</style>
+</head>
+<body>
+
+  <div class="brand">
+    <div class="bar"></div>
+    <div>
+      <h1>BU SİTE GÜVENLİ Mİ?</h1>
+      <div class="sub">WEB SECURITY ANALYSIS</div>
+    </div>
+  </div>
+
+  <div class="card hero">
+    <div class="eyebrow">PASSIVE SECURITY SCANNER</div>
+    <h2>Bu site güvenli mi?</h2>
+    <p>Bir web sitesinin bağlantı, DNS, TLS, HTTP, güvenlik başlıkları, çerezler, kaynaklar, yönlendirmeler ve diğer pasif güvenlik sinyallerini analiz edin.</p>
+    <div class="field-label">TARGET URL</div>
+    <input id="url" placeholder="https://example.com" autocomplete="off" />
+    <button class="btn btn-start" id="startBtn" onclick="startScan()">START ANALYSIS</button>
+    <button class="btn btn-stop" id="stopBtn" onclick="stopScan()">STOP ANALYSIS</button>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">ANALYSIS AGENT</div>
+    <h3 class="section-title" id="agentTitle" style="margin-bottom:14px;">Waiting for target</h3>
+    <div class="agent-grid">
+      <div><div>TARGET</div><div class="val" id="targetVal">-</div></div>
+      <div style="text-align:right;"><div>SCAN ID</div><div class="val" id="scanIdVal">-</div></div>
+    </div>
+    <div class="radar-wrap">
+      <div class="radar">
+        <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+        <div class="cross h"></div><div class="cross v"></div>
+        <div class="needle"></div>
+        <div class="center-dot"></div>
+      </div>
+    </div>
+    <div class="elapsed">ELAPSED &nbsp;<b id="elapsedVal">00:00</b></div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">SCAN PROGRESS</div>
+    <h3 class="section-title">Analysis pipeline</h3>
+    <div class="pipeline-pct"><span id="pct">0</span>%</div>
+    <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+    <div class="status-line" id="statusLine">Waiting to start...</div>
+    <div class="stages" id="stages">
+      <div class="stage" data-s="init">INITIALIZE</div>
+      <div class="stage" data-s="net">NETWORK</div>
+      <div class="stage" data-s="sec">SECURITY</div>
+      <div class="stage" data-s="ana">ANALYSIS</div>
+      <div class="stage" data-s="rep">REPORT</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="term-hdr"><span class="dot"></span><span>LIVE ANALYSIS TERMINAL</span></div>
+    <div id="terminal"><div class="l"><span class="tag">[SYSTEM]</span> READY Waiting for scan request...</div></div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">SECURITY MODULES</div>
+    <h3 class="section-title">Analysis modules</h3>
+    <div class="modules" id="modules"></div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">FINAL ASSESSMENT</div>
+    <h3 class="section-title">Security result</h3>
+    <div class="score-label">SECURITY SCORE</div>
+    <div class="score-row"><span class="score-num" id="finalScore">--</span><span class="score-den">/100</span></div>
+    <div class="verdict-badge" id="verdictBadge">WAITING FOR ANALYSIS</div>
+    <p id="finalText" style="font-size:12px;color:var(--dim);margin-top:14px;line-height:1.6;">Start an analysis to generate the final security assessment.</p>
+    <div class="reco">
+      <div class="eyebrow">RECOMMENDATIONS</div>
+      <ul id="recoList"><li style="list-style:none;margin-left:-18px;color:var(--dim);">Recommendations will appear here.</li></ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">LOCAL HISTORY</div>
+    <h3 class="section-title">Previous analyses</h3>
+    <div id="historyList" style="font-size:12px;color:var(--dim);">No previous analyses.</div>
+  </div>
+
+  <div class="card disclaimer">
+    <div class="eyebrow">IMPORTANT</div>
+    This service performs passive and limited automated checks. A low-risk result does not guarantee that a website is completely safe, trustworthy or free from malicious content.
+  </div>
+
+<script>
+  const MODULES = [
+    { id: 'domain', n: '01', title: 'Domain Intelligence', desc: 'Domain, protocol, port and target information.' },
+    { id: 'dns', n: '02', title: 'DNS Resolution', desc: 'DNS resolution and network address analysis.' },
+    { id: 'tls', n: '03', title: 'TLS Security', desc: 'HTTPS connection and certificate signals.' },
+    { id: 'http', n: '04', title: 'HTTP Analysis', desc: 'Response status and HTTP metadata.' },
+    { id: 'redirect', n: '05', title: 'Redirect Chain', desc: 'HTTP redirect chain inspection.' },
+    { id: 'headers', n: '06', title: 'Security Headers', desc: 'Browser security header configuration.' },
+    { id: 'cookies', n: '07', title: 'Cookie Analysis', desc: 'Initial response cookie inspection.' },
+    { id: 'forms', n: '08', title: 'Form Analysis', desc: 'Forms detected in the downloaded HTML.' },
+    { id: 'js', n: '09', title: 'JavaScript', desc: 'Script references and client-side surface.' },
+    { id: 'resources', n: '10', title: 'Resources', desc: 'Images, scripts, stylesheets and external resources.' },
+    { id: 'privacy', n: '11', title: 'Privacy Surface', desc: 'Cookies, forms and third-party domains.' },
+    { id: 'sitemap', n: '12', title: 'Sitemap', desc: 'Common sitemap location inspection.' },
+    { id: 'threat', n: '13', title: 'Threat Signals', desc: 'Passive security findings and risk signals.' }
+  ];
+
+  const modulesEl = document.getElementById('modules');
+  MODULES.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'module';
+    div.id = 'mod-' + m.id;
+    div.innerHTML = `
+      <div class="mrow"><span>${m.n}</span><span class="mstatus">WAITING</span></div>
+      <h4>${m.title}</h4>
+      <p>${m.desc}</p>
+      <div class="result" style="display:none;"></div>`;
+    modulesEl.appendChild(div);
+  });
+
+  let scanning = false;
+  let startTime = null;
+  let elapsedTimer = null;
+  let scanId = null;
+
+  function log(text, cls) {
+    const term = document.getElementById('terminal');
+    const row = document.createElement('div');
+    row.className = 'l' + (cls ? ' ' + cls : '');
+    row.innerHTML = `<span class="tag">[SCAN]</span> ${text}`;
+    term.appendChild(row);
+    term.scrollTop = term.scrollHeight;
+  }
+
+  function setStage(id, state) {
+    const el = document.querySelector(`.stage[data-s="${id}"]`);
+    el.classList.remove('active', 'done');
+    if (state) el.classList.add(state);
+  }
+
+  function setModule(id, state, resultText) {
+    const el = document.getElementById('mod-' + id);
+    const status = el.querySelector('.mstatus');
+    status.className = 'mstatus' + (state ? ' ' + state : '');
+    status.textContent = state === 'active' ? 'RUNNING' : state === 'done' ? 'DONE' : 'WAITING';
+    el.classList.toggle('active', state === 'active');
+    if (resultText) {
+      const r = el.querySelector('.result');
+      r.style.display = 'block';
+      r.textContent = resultText;
+    }
+  }
+
+  function pct(v) {
+    document.getElementById('pct').textContent = v;
+    document.getElementById('barFill').style.width = v + '%';
+  }
+
+  function startElapsed() {
+    startTime = Date.now();
+    elapsedTimer = setInterval(() => {
+      const s = Math.floor((Date.now() - startTime) / 1000);
+      const mm = String(Math.floor(s / 60)).padStart(2, '0');
+      const ss = String(s % 60).padStart(2, '0');
+      document.getElementById('elapsedVal').textContent = `${mm}:${ss}`;
+    }, 1000);
+  }
+
+  function stopScan() {
+    scanning = false;
+    clearInterval(elapsedTimer);
+    log('taramayı iptal ettiniz.', 'warn');
+    document.getElementById('startBtn').disabled = false;
+  }
+
+  async function startScan() {
+    const url = document.getElementById('url').value.trim();
+    if (!url || scanning) return;
+    scanning = true;
+    scanId = Math.random().toString(36).slice(2, 8);
+
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('agentTitle').textContent = 'Scanning target';
+    document.getElementById('targetVal').textContent = url;
+    document.getElementById('scanIdVal').textContent = scanId;
+    document.getElementById('terminal').innerHTML = '';
+    document.getElementById('finalScore').textContent = '--';
+    document.getElementById('verdictBadge').textContent = 'RUNNING';
+    document.getElementById('verdictBadge').className = 'verdict-badge';
+    startElapsed();
+
+    log(`hedef alındı: ${url}`);
+    pct(5); setStage('init', 'active');
+    await sleep(200);
+    setStage('init', 'done'); setStage('net', 'active'); pct(15);
+
+    let hostname;
+    try { hostname = new URL(url).hostname; } catch { hostname = url; }
+
+    log('sunucudan tam analiz isteniyor...');
+    let data = null;
+    try {
+      const res = await fetch('/api/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      data = await res.json();
+      if (data.error) throw new Error(data.error);
+    } catch (e) {
+      log('hata: ' + e.message, 'bad');
+      document.getElementById('statusLine').textContent = 'Tarama başarısız.';
+      scanning = false;
+      document.getElementById('startBtn').disabled = false;
+      clearInterval(elapsedTimer);
+      return;
+    }
+
+    const m = data.modules;
+    setStage('net', 'done'); setStage('sec', 'active'); pct(35);
+
+    setModule('domain', 'active'); await sleep(150);
+    setModule('domain', 'done', `host: ${m.domain.finalHost}`);
+    log(`domain: ${m.domain.finalHost}`);
+
+    setModule('dns', 'active'); await sleep(150);
+    setModule('dns', 'done', m.dns.checked ? `${m.dns.a.length} A kaydı` : 'çözümlenemedi');
+    log(m.dns.checked ? 'dns çözümlendi' : 'dns hatası', m.dns.checked ? null : 'warn');
+
+    setModule('tls', 'active'); await sleep(150);
+    setModule('tls', 'done', m.tls.valid ? `geçerli, ${m.tls.issuer || ''}` : 'geçersiz/tespit edilemedi');
+    log(m.tls.valid ? 'ssl geçerli' : 'ssl sorunlu', m.tls.valid ? null : 'warn');
+    pct(50);
+
+    setModule('http', 'active'); await sleep(150);
+    setModule('http', 'done', `${m.http.status} · ${m.http.hops} hop`);
+    log(`http yanıtı: ${m.http.status}`);
+
+    setModule('redirect', 'active'); await sleep(150);
+    setModule('redirect', 'done', m.redirect.chain.length > 1 ? `${m.redirect.chain.length} adım` : 'yönlendirme yok');
+
+    setStage('sec', 'done'); setStage('ana', 'active'); pct(65);
+
+    setModule('headers', 'active'); await sleep(150);
+    setModule('headers', 'done', `${m.headers.missing.length} eksik başlık`);
+    log(m.headers.missing.length > 0 ? `eksik başlıklar: ${m.headers.missing.join(', ')}` : 'tüm güvenlik başlıkları mevcut',
+        m.headers.missing.length > 0 ? 'warn' : null);
+
+    setModule('cookies', 'active'); await sleep(150);
+    setModule('cookies', 'done', `${m.cookies.count} çerez, ${m.cookies.issues.length} uyarı`);
+
+    setModule('forms', 'active'); await sleep(150);
+    setModule('forms', 'done', `${m.forms.count} form${m.forms.riskyOverHttp > 0 ? ' · HTTP üzerinden şifre!' : ''}`);
+    if (m.forms.riskyOverHttp > 0) log('şifre formu HTTPS olmadan tespit edildi!', 'bad');
+
+    setModule('js', 'active'); await sleep(150);
+    setModule('js', 'done', `${m.js.externalDomains.length} dış script kaynağı`);
+
+    setModule('resources', 'active'); await sleep(150);
+    setModule('resources', 'done', `${m.resources.count} kaynak, ${m.resources.externalDomains.length} dış alan`);
+
+    setModule('privacy', 'active'); await sleep(150);
+    setModule('privacy', 'done', `${m.privacy.thirdPartyDomainCount} üçüncü taraf alan`);
+
+    setModule('sitemap', 'active'); await sleep(150);
+    setModule('sitemap', 'done', m.sitemap.checked ? (m.sitemap.found ? 'bulundu' : 'bulunamadı') : 'kontrol edilemedi');
+
+    const sb = data.layer1.safeBrowsing;
+    setModule('threat', 'active');
+    log('kara liste taranıyor...');
+    await sleep(200);
+    setModule('threat', 'done', `${m.threat.findings.length} bulgu`);
+    m.threat.findings.forEach(f => log(f.text, f.level === 'bad' ? 'bad' : 'warn'));
+    if (sb.checked && !sb.clean) log('tehdit tespit edildi!', 'bad');
+    else log('kara listede kayıt yok');
+
+    pct(90); setStage('ana', 'done'); setStage('rep', 'active');
+    await sleep(200);
+    pct(100); setStage('rep', 'done');
+
+    const age = data.layer1.domainAge;
+    const ssl = m.tls;
+    let score = data.score;
+    document.getElementById('finalScore').textContent = score;
+    const badge = document.getElementById('verdictBadge');
+    if (score >= 70) { badge.textContent = 'GÜVENİLİR'; badge.className = 'verdict-badge ok'; }
+    else if (score >= 40) { badge.textContent = 'ŞÜPHELİ'; badge.className = 'verdict-badge mid'; }
+    else { badge.textContent = 'RİSKLİ'; badge.className = 'verdict-badge bad'; }
+
+    document.getElementById('finalText').textContent =
+      `${m.domain.finalHost} için tarama tamamlandı. Skor: ${score}/100.`;
+
+    const recos = [];
+    if (ssl && !ssl.valid) recos.push('SSL sertifikası sorunlu — bu siteye hassas bilgi girmeyin.');
+    if (sb?.checked && !sb.clean) recos.push('Bu site bilinen bir tehdit listesinde — erişmemenizi öneririz.');
+    if (age?.risky) recos.push('Domain çok yeni açılmış — temkinli olun.');
+    if (m.forms.riskyOverHttp > 0) recos.push('Şifre formu HTTPS olmadan gönderiliyor — bilgilerinizi girmeyin.');
+    if (m.headers.missing.length >= 3) recos.push('Tarayıcı güvenlik başlıkları eksik.');
+    if (recos.length === 0) recos.push('Belirgin bir risk sinyali tespit edilmedi, yine de dikkatli olun.');
+    document.getElementById('recoList').innerHTML = recos.map(r => `<li>${r}</li>`).join('');
+
+    document.getElementById('agentTitle').textContent = 'Scan complete';
+    document.getElementById('statusLine').textContent = 'Tarama tamamlandı.';
+    log('tarama tamamlandı.');
+    clearInterval(elapsedTimer);
+
+    const hist = document.getElementById('historyList');
+    if (hist.textContent.includes('No previous')) hist.innerHTML = '';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-family:ui-monospace,Menlo,monospace;';
+    row.innerHTML = `<span style="color:var(--text)">${m.domain.finalHost}</span><span style="color:var(--mint)">${score}/100</span>`;
+    hist.prepend(row);
+
+    scanning = false;
+    document.getElementById('startBtn').disabled = false;
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
