@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bu Site Güvenli mi? | Web Security Analysis</title>
+<title>Bu Site Güvenli mi?</title>
 <style>
   :root {
-    --bg: #0a0d10;
-    --panel: #0e1318;
-    --line: #1c242c;
-    --text: #dbe4ea;
-    --dim: #5c6975;
-    --mint: #3ecf8e;
-    --amber: #d9a441;
-    --danger: #e0605c;
+    --bg: #050708;
+    --panel: #0a0d0f;
+    --line: #1c2226;
+    --text: #c4cdd2;
+    --dim: #55606a;
+    --ice: #7fb8c9;
+    --danger: #b5544d;
+    --amber: #b89a5a;
   }
 
   * { box-sizing: border-box; }
@@ -21,25 +21,31 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
-    max-width: 640px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    max-width: 620px;
     margin: 0 auto;
-    padding: 20px 16px 60px;
+    padding: 18px 14px 50px;
+    font-size: 12.5px;
+    line-height: 1.5;
   }
 
   .brand {
     display: flex;
-    gap: 12px;
-    align-items: stretch;
-    padding-bottom: 18px;
-    margin-bottom: 20px;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
     border-bottom: 1px solid var(--line);
   }
-  .brand .bar { width: 4px; background: var(--mint); border-radius: 2px; }
-  .brand h1 { font-size: 15px; margin: 2px 0 3px; letter-spacing: 0.02em; }
+  .brand h1 {
+    font-size: 13px;
+    margin: 0;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    font-weight: 600;
+  }
   .brand .sub {
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 10px;
+    font-size: 9.5px;
     color: var(--dim);
     letter-spacing: 0.08em;
   }
@@ -47,233 +53,209 @@
   .card {
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 14px;
-  }
-
-  .eyebrow {
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    color: var(--mint);
+    padding: 16px;
     margin-bottom: 10px;
   }
 
-  /* --- Hero --- */
+  .eyebrow {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
   .hero h2 {
-    font-size: 28px;
-    line-height: 1.15;
-    margin: 0 0 12px;
-    font-weight: 700;
+    font-size: 17px;
+    line-height: 1.3;
+    margin: 0 0 10px;
+    font-weight: 600;
+    color: var(--text);
   }
   .hero p {
     color: var(--dim);
-    font-size: 13px;
+    font-size: 11.5px;
     line-height: 1.6;
-    margin: 0 0 18px;
+    margin: 0 0 16px;
   }
   .field-label {
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 10px;
+    font-size: 9.5px;
     color: var(--dim);
-    letter-spacing: 0.08em;
-    margin-bottom: 6px;
+    letter-spacing: 0.06em;
+    margin-bottom: 5px;
   }
+
   #url {
     width: 100%;
     background: var(--bg);
     border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 13px 14px;
+    padding: 11px 12px;
     color: var(--text);
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 13px;
+    font-family: inherit;
+    font-size: 12px;
     outline: none;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   #url::placeholder { color: var(--dim); }
-  #url:focus { border-color: var(--mint); }
+  #url:focus { border-color: var(--ice); }
 
   .btn {
     width: 100%;
-    border: none;
-    border-radius: 8px;
-    padding: 13px;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.03em;
+    border: 1px solid var(--line);
+    padding: 11px;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    font-family: ui-monospace, Menlo, monospace;
+    font-family: inherit;
+    background: transparent;
+    color: var(--text);
   }
-  .btn-start { background: var(--mint); color: #04140d; margin-bottom: 8px; }
-  .btn-start:disabled { opacity: 0.4; }
-  .btn-stop { background: transparent; border: 1px solid var(--line); color: var(--dim); }
+  .btn-start { background: var(--ice); color: #05141a; border-color: var(--ice); margin-bottom: 6px; }
+  .btn-start:disabled { opacity: 0.3; }
+  .btn-stop { color: var(--dim); }
 
-  /* --- Radar --- */
   .agent-grid {
     display: flex;
     justify-content: space-between;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 10px;
+    font-size: 9.5px;
     color: var(--dim);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     margin-bottom: 4px;
   }
-  .agent-grid .val { color: var(--text); font-size: 12px; margin-top: 4px; }
+  .agent-grid .val { color: var(--text); font-size: 11px; margin-top: 3px; }
 
-  .radar-wrap { display: flex; justify-content: center; margin: 18px 0 4px; }
+  .radar-wrap { display: flex; justify-content: center; margin: 16px 0 2px; }
   .radar {
     position: relative;
-    width: 200px; height: 200px;
+    width: 170px; height: 170px;
     border-radius: 50%;
-    background: radial-gradient(circle, #0b1712 0%, #0a0d10 72%);
+    background: var(--bg);
     border: 1px solid var(--line);
     overflow: hidden;
   }
-  .ring { position: absolute; border: 1px solid rgba(62,207,142,0.14); border-radius: 50%; }
+  .ring { position: absolute; border: 1px solid rgba(127,184,201,0.12); border-radius: 50%; }
   .ring.r1 { inset: 18%; } .ring.r2 { inset: 36%; } .ring.r3 { inset: 54%; }
-  .cross { position: absolute; background: rgba(62,207,142,0.14); }
+  .cross { position: absolute; background: rgba(127,184,201,0.12); }
   .cross.h { top: 50%; left: 0; right: 0; height: 1px; }
   .cross.v { left: 50%; top: 0; bottom: 0; width: 1px; }
   .needle {
     position: absolute;
     top: 50%; left: 50%;
     width: 50%; height: 1px;
-    background: linear-gradient(90deg, var(--mint), transparent);
+    background: linear-gradient(90deg, var(--ice), transparent);
     transform-origin: 0% 50%;
     animation: sweep 3.6s linear infinite;
   }
   @keyframes sweep { to { transform: rotate(360deg); } }
   .center-dot {
     position: absolute; top: 50%; left: 50%;
-    width: 8px; height: 8px; margin: -4px;
-    border-radius: 50%; background: var(--mint);
-    box-shadow: 0 0 10px var(--mint);
+    width: 5px; height: 5px; margin: -2.5px;
+    background: var(--ice);
   }
 
-  .elapsed { text-align: center; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--dim); margin-top: 10px; }
+  .elapsed { text-align: center; font-size: 10px; color: var(--dim); margin-top: 8px; letter-spacing: 0.04em; }
   .elapsed b { color: var(--text); }
 
-  /* --- Pipeline --- */
-  .pipeline-pct { font-family: ui-monospace, Menlo, monospace; font-size: 30px; color: var(--mint); margin: 6px 0 12px; }
-  .bar-track { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-bottom: 10px; }
-  .bar-fill { height: 100%; width: 0%; background: var(--mint); transition: width 0.4s ease; }
-  .status-line { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--dim); margin-bottom: 14px; }
-  .stages { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pipeline-pct { font-size: 22px; color: var(--text); margin: 4px 0 10px; font-weight: 600; }
+  .bar-track { height: 2px; background: var(--line); overflow: hidden; margin-bottom: 8px; }
+  .bar-fill { height: 100%; width: 0%; background: var(--ice); transition: width 0.4s ease; }
+  .status-line { font-size: 10px; color: var(--dim); margin-bottom: 12px; }
+  .stages { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .stage {
     border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 9px 10px;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 10px;
-    letter-spacing: 0.06em;
+    padding: 7px 9px;
+    font-size: 9px;
+    letter-spacing: 0.05em;
     color: var(--dim);
   }
-  .stage.active { border-color: var(--mint); color: var(--mint); }
+  .stage.active { border-color: var(--ice); color: var(--ice); }
   .stage.done { color: var(--text); }
-  .stage.done::after { content: " ✓"; color: var(--mint); }
+  .stage.done::after { content: " · TAMAM"; color: var(--dim); }
 
-  /* --- Terminal --- */
-  .term-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .term-hdr .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); animation: blink 1.4s ease-in-out infinite; }
+  .term-hdr { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+  .term-hdr .dot { width: 4px; height: 4px; background: var(--ice); animation: blink 1.4s ease-in-out infinite; }
   @keyframes blink { 50% { opacity: 0.2; } }
-  .term-hdr span { font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: var(--dim); letter-spacing: 0.08em; }
+  .term-hdr span { font-size: 9.5px; color: var(--dim); letter-spacing: 0.08em; }
   #terminal {
-    background: #06090b;
+    background: #020304;
     border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 14px;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 11.5px;
-    line-height: 1.9;
-    min-height: 90px;
-    max-height: 220px;
+    padding: 11px;
+    font-size: 10.5px;
+    line-height: 1.8;
+    min-height: 80px;
+    max-height: 200px;
     overflow-y: auto;
   }
   #terminal .l { color: var(--dim); }
-  #terminal .l .tag { color: var(--mint); }
+  #terminal .l .tag { color: var(--ice); }
   #terminal .l.warn .tag { color: var(--amber); }
   #terminal .l.bad .tag { color: var(--danger); }
 
-  /* --- Modules --- */
-  h3.section-title { font-size: 17px; margin: 4px 0 12px; font-weight: 700; }
-  .modules { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  h3.section-title { font-size: 13px; margin: 3px 0 10px; font-weight: 600; color: var(--text); }
+  .modules { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
   .module {
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 16px;
+    padding: 12px;
   }
-  .module.active { border-color: var(--mint); }
-  .module .mrow { display: flex; justify-content: space-between; font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: var(--dim); margin-bottom: 10px; }
-  .module .mstatus { letter-spacing: 0.06em; }
-  .module .mstatus.done { color: var(--mint); }
+  .module.active { border-color: var(--ice); }
+  .module .mrow { display: flex; justify-content: space-between; font-size: 9px; color: var(--dim); margin-bottom: 7px; letter-spacing: 0.04em; }
+  .module .mstatus.done { color: var(--ice); }
   .module .mstatus.active { color: var(--amber); }
-  .module h4 { font-size: 15px; margin: 0 0 4px; }
-  .module p { font-size: 12px; color: var(--dim); margin: 0; }
-  .module .result { margin-top: 10px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--text); }
+  .module h4 { font-size: 12px; margin: 0 0 3px; color: var(--text); font-weight: 600; }
+  .module p { font-size: 10.5px; color: var(--dim); margin: 0; }
+  .module .result { margin-top: 7px; font-size: 10.5px; color: var(--text); }
 
-  /* --- Final --- */
-  .score-row { display: flex; align-items: baseline; gap: 10px; margin: 10px 0 6px; }
-  .score-num { font-family: ui-monospace, Menlo, monospace; font-size: 46px; font-weight: 700; color: var(--mint); }
-  .score-den { font-family: ui-monospace, Menlo, monospace; font-size: 16px; color: var(--dim); }
-  .score-label { font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: var(--dim); letter-spacing: 0.08em; margin-bottom: 4px; }
+  .score-row { display: flex; align-items: baseline; gap: 6px; margin: 8px 0 4px; }
+  .score-num { font-size: 34px; font-weight: 700; color: var(--text); }
+  .score-den { font-size: 12px; color: var(--dim); }
+  .score-label { font-size: 9.5px; color: var(--dim); letter-spacing: 0.08em; margin-bottom: 3px; }
   .verdict-badge {
     display: inline-block;
     border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    margin-top: 8px;
+    padding: 4px 10px;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    margin-top: 6px;
     color: var(--dim);
   }
-  .verdict-badge.ok { border-color: var(--mint); color: var(--mint); }
+  .verdict-badge.ok { border-color: var(--ice); color: var(--ice); }
   .verdict-badge.mid { border-color: var(--amber); color: var(--amber); }
   .verdict-badge.bad { border-color: var(--danger); color: var(--danger); }
 
-  .reco { margin-top: 16px; }
-  .reco .eyebrow { margin-bottom: 8px; }
-  .reco ul { margin: 0; padding-left: 18px; font-size: 12px; color: var(--dim); line-height: 1.7; }
+  .reco { margin-top: 14px; }
+  .reco .eyebrow { margin-bottom: 6px; }
+  .reco ul { margin: 0; padding-left: 14px; font-size: 10.5px; color: var(--dim); line-height: 1.7; }
 
-  .disclaimer {
-    font-size: 11px;
-    color: var(--dim);
-    line-height: 1.6;
-  }
-  .disclaimer .eyebrow { color: var(--amber); }
+  .disclaimer { font-size: 10px; color: var(--dim); line-height: 1.6; }
+
+  .hist-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 10.5px; }
 </style>
 </head>
 <body>
 
   <div class="brand">
-    <div class="bar"></div>
-    <div>
-      <h1>BU SİTE GÜVENLİ Mİ?</h1>
-      <div class="sub">WEB SECURITY ANALYSIS</div>
-    </div>
+    <h1>BU SİTE GÜVENLİ Mİ?</h1>
+    <div class="sub">GÜVENLİK TARAMA ARACI</div>
   </div>
 
-  <!-- HERO -->
   <div class="card hero">
-    <div class="eyebrow">PASSIVE SECURITY SCANNER</div>
-    <h2>Bu site güvenli mi?</h2>
-    <p>Bir web sitesinin bağlantı, DNS, TLS, HTTP, güvenlik başlıkları, çerezler, kaynaklar, yönlendirmeler ve diğer pasif güvenlik sinyallerini analiz edin.</p>
-    <div class="field-label">TARGET URL</div>
-    <input id="url" placeholder="https://example.com" autocomplete="off" />
-    <button class="btn btn-start" id="startBtn" onclick="startScan()">START ANALYSIS</button>
-    <button class="btn btn-stop" id="stopBtn" onclick="stopScan()">STOP ANALYSIS</button>
+    <div class="eyebrow">HEDEF</div>
+    <h2>Site adresini gir, taransın.</h2>
+    <p>Bağlantı, DNS, sertifika, başlık, çerez, form ve kaynak sinyalleri incelenir. Sonuç bir tahmindir, kesin garanti değildir.</p>
+    <div class="field-label">ADRES</div>
+    <input id="url" placeholder="https://ornek.com" autocomplete="off" />
+    <button class="btn btn-start" id="startBtn" onclick="startScan()">TARAMAYI BAŞLAT</button>
+    <button class="btn btn-stop" id="stopBtn" onclick="stopScan()">DURDUR</button>
   </div>
 
-  <!-- AGENT / RADAR -->
   <div class="card">
-    <div class="eyebrow">ANALYSIS AGENT</div>
-    <h3 class="section-title" id="agentTitle" style="margin-bottom:14px;">Waiting for target</h3>
+    <div class="eyebrow">DURUM</div>
+    <h3 class="section-title" id="agentTitle" style="margin-bottom:12px;">Hedef bekleniyor</h3>
     <div class="agent-grid">
-      <div><div>TARGET</div><div class="val" id="targetVal">-</div></div>
-      <div style="text-align:right;"><div>SCAN ID</div><div class="val" id="scanIdVal">-</div></div>
+      <div><div>HEDEF</div><div class="val" id="targetVal">—</div></div>
+      <div style="text-align:right;"><div>TARAMA NO</div><div class="val" id="scanIdVal">—</div></div>
     </div>
     <div class="radar-wrap">
       <div class="radar">
@@ -283,80 +265,74 @@
         <div class="center-dot"></div>
       </div>
     </div>
-    <div class="elapsed">ELAPSED &nbsp;<b id="elapsedVal">00:00</b></div>
+    <div class="elapsed">SÜRE &nbsp;<b id="elapsedVal">00:00</b></div>
   </div>
 
-  <!-- PIPELINE -->
   <div class="card">
-    <div class="eyebrow">SCAN PROGRESS</div>
-    <h3 class="section-title">Analysis pipeline</h3>
+    <div class="eyebrow">İLERLEME</div>
+    <h3 class="section-title">Tarama akışı</h3>
     <div class="pipeline-pct"><span id="pct">0</span>%</div>
     <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
-    <div class="status-line" id="statusLine">Waiting to start...</div>
+    <div class="status-line" id="statusLine">Başlatılmadı.</div>
     <div class="stages" id="stages">
-      <div class="stage" data-s="init">INITIALIZE</div>
-      <div class="stage" data-s="net">NETWORK</div>
-      <div class="stage" data-s="sec">SECURITY</div>
-      <div class="stage" data-s="ana">ANALYSIS</div>
-      <div class="stage" data-s="rep">REPORT</div>
+      <div class="stage" data-s="init">BAŞLANGIÇ</div>
+      <div class="stage" data-s="net">AĞ</div>
+      <div class="stage" data-s="sec">GÜVENLİK</div>
+      <div class="stage" data-s="ana">ANALİZ</div>
+      <div class="stage" data-s="rep">RAPOR</div>
     </div>
   </div>
 
-  <!-- TERMINAL -->
   <div class="card">
-    <div class="term-hdr"><span class="dot"></span><span>LIVE ANALYSIS TERMINAL</span></div>
-    <div id="terminal"><div class="l"><span class="tag">[SYSTEM]</span> READY Waiting for scan request...</div></div>
+    <div class="term-hdr"><span class="dot"></span><span>KAYIT</span></div>
+    <div id="terminal"><div class="l"><span class="tag">[SİSTEM]</span> hazır, tarama bekleniyor.</div></div>
   </div>
 
-  <!-- MODULES -->
   <div class="card">
-    <div class="eyebrow">SECURITY MODULES</div>
-    <h3 class="section-title">Analysis modules</h3>
+    <div class="eyebrow">MODÜLLER</div>
+    <h3 class="section-title">Kontrol listesi</h3>
     <div class="modules" id="modules"></div>
   </div>
 
-  <!-- FINAL ASSESSMENT -->
   <div class="card">
-    <div class="eyebrow">FINAL ASSESSMENT</div>
-    <h3 class="section-title">Security result</h3>
-    <div class="score-label">SECURITY SCORE</div>
-    <div class="score-row"><span class="score-num" id="finalScore">--</span><span class="score-den">/100</span></div>
-    <div class="verdict-badge" id="verdictBadge">WAITING FOR ANALYSIS</div>
-    <p id="finalText" style="font-size:12px;color:var(--dim);margin-top:14px;line-height:1.6;">Start an analysis to generate the final security assessment.</p>
+    <div class="eyebrow">SONUÇ</div>
+    <h3 class="section-title">Değerlendirme</h3>
+    <div class="score-label">GÜVEN SKORU</div>
+    <div class="score-row"><span class="score-num" id="finalScore">—</span><span class="score-den">/100</span></div>
+    <div class="verdict-badge" id="verdictBadge">BEKLİYOR</div>
+    <p id="finalText" style="font-size:10.5px;color:var(--dim);margin-top:12px;line-height:1.6;">Tarama başlatılınca sonuç burada görünecek.</p>
     <div class="reco">
-      <div class="eyebrow">RECOMMENDATIONS</div>
-      <ul id="recoList"><li style="list-style:none;margin-left:-18px;color:var(--dim);">Recommendations will appear here.</li></ul>
+      <div class="eyebrow">ÖNERİLER</div>
+      <ul id="recoList"><li style="list-style:none;margin-left:-14px;color:var(--dim);">Henüz yok.</li></ul>
     </div>
   </div>
 
-  <!-- HISTORY -->
   <div class="card">
-    <div class="eyebrow">LOCAL HISTORY</div>
-    <h3 class="section-title">Previous analyses</h3>
-    <div id="historyList" style="font-size:12px;color:var(--dim);">No previous analyses.</div>
+    <div class="eyebrow">GEÇMİŞ</div>
+    <h3 class="section-title">Önceki taramalar</h3>
+    <div id="historyList" style="font-size:10.5px;color:var(--dim);">Kayıt yok.</div>
   </div>
 
-  <!-- DISCLAIMER -->
   <div class="card disclaimer">
-    <div class="eyebrow">IMPORTANT</div>
-    This service performs passive and limited automated checks. A low-risk result does not guarantee that a website is completely safe, trustworthy or free from malicious content.
+    <div class="eyebrow">NOT</div>
+    Bu araç sınırlı ve pasif kontroller yapar. Düşük risk sonucu, sitenin tamamen güvenli olduğu anlamına gelmez.
   </div>
 
 <script>
   const MODULES = [
-    { id: 'domain', n: '01', title: 'Domain Intelligence', desc: 'Domain, protocol, port and target information.' },
-    { id: 'dns', n: '02', title: 'DNS Resolution', desc: 'DNS resolution and network address analysis.' },
-    { id: 'tls', n: '03', title: 'TLS Security', desc: 'HTTPS connection and certificate signals.' },
-    { id: 'http', n: '04', title: 'HTTP Analysis', desc: 'Response status and HTTP metadata.' },
-    { id: 'redirect', n: '05', title: 'Redirect Chain', desc: 'HTTP redirect chain inspection.' },
-    { id: 'headers', n: '06', title: 'Security Headers', desc: 'Browser security header configuration.' },
-    { id: 'cookies', n: '07', title: 'Cookie Analysis', desc: 'Initial response cookie inspection.' },
-    { id: 'forms', n: '08', title: 'Form Analysis', desc: 'Forms detected in the downloaded HTML.' },
-    { id: 'js', n: '09', title: 'JavaScript', desc: 'Script references and client-side surface.' },
-    { id: 'resources', n: '10', title: 'Resources', desc: 'Images, scripts, stylesheets and external resources.' },
-    { id: 'privacy', n: '11', title: 'Privacy Surface', desc: 'Cookies, forms and third-party domains.' },
-    { id: 'sitemap', n: '12', title: 'Sitemap', desc: 'Common sitemap location inspection.' },
-    { id: 'threat', n: '13', title: 'Threat Signals', desc: 'Passive security findings and risk signals.' }
+    { id: 'domain', n: '01', title: 'Alan Adı Bilgisi', desc: 'Hedef adres, protokol, port.' },
+    { id: 'dns', n: '02', title: 'DNS Çözümleme', desc: 'DNS kayıtları ve ağ adresi.' },
+    { id: 'tls', n: '03', title: 'SSL Sertifikası', desc: 'HTTPS bağlantısı ve sertifika.' },
+    { id: 'http', n: '04', title: 'HTTP Yanıtı', desc: 'Durum kodu ve başlıklar.' },
+    { id: 'redirect', n: '05', title: 'Yönlendirme Zinciri', desc: 'Yönlendirme sayısı ve rotası.' },
+    { id: 'headers', n: '06', title: 'Güvenlik Başlıkları', desc: 'Tarayıcı koruma ayarları.' },
+    { id: 'cookies', n: '07', title: 'Çerez Analizi', desc: 'Çerez bayrakları ve sayısı.' },
+    { id: 'forms', n: '08', title: 'Form Analizi', desc: 'Şifre/veri formu tespiti.' },
+    { id: 'js', n: '09', title: 'JavaScript', desc: 'Dış script kaynakları.' },
+    { id: 'resources', n: '10', title: 'Kaynaklar', desc: 'Görsel, script, stil dosyaları.' },
+    { id: 'privacy', n: '11', title: 'Gizlilik Yüzeyi', desc: 'Üçüncü taraf alan adları.' },
+    { id: 'sitemap', n: '12', title: 'Site Haritası', desc: 'sitemap.xml kontrolü.' },
+    { id: 'threat', n: '13', title: 'Tehdit Sinyalleri', desc: 'Toplam bulgu özeti.' }
   ];
 
   const modulesEl = document.getElementById('modules');
@@ -365,7 +341,7 @@
     div.className = 'module';
     div.id = 'mod-' + m.id;
     div.innerHTML = `
-      <div class="mrow"><span>${m.n}</span><span class="mstatus">WAITING</span></div>
+      <div class="mrow"><span>${m.n}</span><span class="mstatus">BEKLİYOR</span></div>
       <h4>${m.title}</h4>
       <p>${m.desc}</p>
       <div class="result" style="display:none;"></div>`;
@@ -373,16 +349,16 @@
   });
 
   let scanning = false;
-  let currentES = null;
   let startTime = null;
   let elapsedTimer = null;
   let scanId = null;
+  let currentES = null;
 
   function log(text, cls) {
     const term = document.getElementById('terminal');
     const row = document.createElement('div');
     row.className = 'l' + (cls ? ' ' + cls : '');
-    row.innerHTML = `<span class="tag">[SCAN]</span> ${text}`;
+    row.innerHTML = `<span class="tag">[TARAMA]</span> ${text}`;
     term.appendChild(row);
     term.scrollTop = term.scrollHeight;
   }
@@ -397,7 +373,7 @@
     const el = document.getElementById('mod-' + id);
     const status = el.querySelector('.mstatus');
     status.className = 'mstatus' + (state ? ' ' + state : '');
-    status.textContent = state === 'active' ? 'RUNNING' : state === 'done' ? 'DONE' : 'WAITING';
+    status.textContent = state === 'active' ? 'ÇALIŞIYOR' : state === 'done' ? 'TAMAM' : 'BEKLİYOR';
     el.classList.toggle('active', state === 'active');
     if (resultText) {
       const r = el.querySelector('.result');
@@ -425,7 +401,7 @@
     scanning = false;
     if (currentES) { currentES.close(); currentES = null; }
     clearInterval(elapsedTimer);
-    log('taramayı iptal ettiniz.', 'warn');
+    log('tarama durduruldu.', 'warn');
     document.getElementById('startBtn').disabled = false;
   }
 
@@ -436,12 +412,12 @@
     scanId = Math.random().toString(36).slice(2, 8);
 
     document.getElementById('startBtn').disabled = true;
-    document.getElementById('agentTitle').textContent = 'Scanning target';
+    document.getElementById('agentTitle').textContent = 'Taranıyor';
     document.getElementById('targetVal').textContent = url;
     document.getElementById('scanIdVal').textContent = scanId;
     document.getElementById('terminal').innerHTML = '';
-    document.getElementById('finalScore').textContent = '--';
-    document.getElementById('verdictBadge').textContent = 'RUNNING';
+    document.getElementById('finalScore').textContent = '—';
+    document.getElementById('verdictBadge').textContent = 'ÇALIŞIYOR';
     document.getElementById('verdictBadge').className = 'verdict-badge';
     startElapsed();
 
@@ -453,7 +429,6 @@
       resources: 'ana', privacy: 'ana', sitemap: 'ana', threat: 'rep'
     };
     let doneCount = 0;
-    let hostnameOut = url;
 
     const es = new EventSource('/api/check-stream?url=' + encodeURIComponent(url));
     currentES = es;
@@ -465,7 +440,7 @@
 
     es.addEventListener('module', (e) => {
       const d = JSON.parse(e.data);
-      if (d.id === 'threat_partial') return; // sadece log icin kullanilir, kart yok
+      if (d.id === 'threat_partial') return;
       setStage('init', 'done');
       const stg = MODULE_STAGE[d.id];
       if (stg) setStage(stg, 'active');
@@ -476,7 +451,6 @@
 
     es.addEventListener('final', (e) => {
       const d = JSON.parse(e.data);
-      hostnameOut = d.hostname;
       pct(100);
       ['init','net','sec','ana','rep'].forEach(s => setStage(s, 'done'));
 
@@ -490,23 +464,23 @@
         `${d.hostname} için tarama tamamlandı. Skor: ${d.score}/100.`;
 
       const recos = [];
-      if (d.ssl && !d.ssl.valid) recos.push('SSL sertifikası sorunlu — bu siteye hassas bilgi girmeyin.');
-      if (d.safeBrowsing?.checked && !d.safeBrowsing.clean) recos.push('Bu site bilinen bir tehdit listesinde — erişmemenizi öneririz.');
-      if (d.domainAge?.risky) recos.push('Domain çok yeni açılmış — temkinli olun.');
-      if (d.formsRisky > 0) recos.push('Şifre formu HTTPS olmadan gönderiliyor — bilgilerinizi girmeyin.');
+      if (d.ssl && !d.ssl.valid) recos.push('SSL sertifikası sorunlu — hassas bilgi girmeyin.');
+      if (d.safeBrowsing?.checked && !d.safeBrowsing.clean) recos.push('Bu site bilinen bir tehdit listesinde.');
+      if (d.domainAge?.risky) recos.push('Alan adı çok yeni açılmış.');
+      if (d.formsRisky > 0) recos.push('Şifre formu HTTPS olmadan gönderiliyor.');
       if (d.headersMissing >= 3) recos.push('Tarayıcı güvenlik başlıkları eksik.');
-      if (recos.length === 0) recos.push('Belirgin bir risk sinyali tespit edilmedi, yine de dikkatli olun.');
+      if (recos.length === 0) recos.push('Belirgin bir risk sinyali yok, yine de dikkatli olun.');
       document.getElementById('recoList').innerHTML = recos.map(r => `<li>${r}</li>`).join('');
 
-      document.getElementById('agentTitle').textContent = 'Scan complete';
+      document.getElementById('agentTitle').textContent = 'Tamamlandı';
       document.getElementById('statusLine').textContent = 'Tarama tamamlandı.';
       clearInterval(elapsedTimer);
 
       const hist = document.getElementById('historyList');
-      if (hist.textContent.includes('No previous')) hist.innerHTML = '';
+      if (hist.textContent.includes('Kayıt yok')) hist.innerHTML = '';
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-family:ui-monospace,Menlo,monospace;';
-      row.innerHTML = `<span style="color:var(--text)">${d.hostname}</span><span style="color:var(--mint)">${d.score}/100</span>`;
+      row.className = 'hist-row';
+      row.innerHTML = `<span>${d.hostname}</span><span>${d.score}/100</span>`;
       hist.prepend(row);
     });
 
@@ -527,8 +501,6 @@
       clearInterval(elapsedTimer);
     });
   }
-
-  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
 </html>
