@@ -60,6 +60,7 @@
     margin-bottom: 10px;
   }
 
+  /* --- Hero --- */
   .hero h2 {
     font-size: 28px;
     line-height: 1.15;
@@ -109,6 +110,7 @@
   .btn-start:disabled { opacity: 0.4; }
   .btn-stop { background: transparent; border: 1px solid var(--line); color: var(--dim); }
 
+  /* --- Radar --- */
   .agent-grid {
     display: flex;
     justify-content: space-between;
@@ -153,6 +155,7 @@
   .elapsed { text-align: center; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--dim); margin-top: 10px; }
   .elapsed b { color: var(--text); }
 
+  /* --- Pipeline --- */
   .pipeline-pct { font-family: ui-monospace, Menlo, monospace; font-size: 30px; color: var(--mint); margin: 6px 0 12px; }
   .bar-track { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-bottom: 10px; }
   .bar-fill { height: 100%; width: 0%; background: var(--mint); transition: width 0.4s ease; }
@@ -171,6 +174,7 @@
   .stage.done { color: var(--text); }
   .stage.done::after { content: " ✓"; color: var(--mint); }
 
+  /* --- Terminal --- */
   .term-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
   .term-hdr .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); animation: blink 1.4s ease-in-out infinite; }
   @keyframes blink { 50% { opacity: 0.2; } }
@@ -192,6 +196,7 @@
   #terminal .l.warn .tag { color: var(--amber); }
   #terminal .l.bad .tag { color: var(--danger); }
 
+  /* --- Modules --- */
   h3.section-title { font-size: 17px; margin: 4px 0 12px; font-weight: 700; }
   .modules { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
   .module {
@@ -209,6 +214,7 @@
   .module p { font-size: 12px; color: var(--dim); margin: 0; }
   .module .result { margin-top: 10px; font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--text); }
 
+  /* --- Final --- */
   .score-row { display: flex; align-items: baseline; gap: 10px; margin: 10px 0 6px; }
   .score-num { font-family: ui-monospace, Menlo, monospace; font-size: 46px; font-weight: 700; color: var(--mint); }
   .score-den { font-family: ui-monospace, Menlo, monospace; font-size: 16px; color: var(--dim); }
@@ -250,6 +256,7 @@
     </div>
   </div>
 
+  <!-- HERO -->
   <div class="card hero">
     <div class="eyebrow">PASSIVE SECURITY SCANNER</div>
     <h2>Bu site güvenli mi?</h2>
@@ -260,6 +267,7 @@
     <button class="btn btn-stop" id="stopBtn" onclick="stopScan()">STOP ANALYSIS</button>
   </div>
 
+  <!-- AGENT / RADAR -->
   <div class="card">
     <div class="eyebrow">ANALYSIS AGENT</div>
     <h3 class="section-title" id="agentTitle" style="margin-bottom:14px;">Waiting for target</h3>
@@ -278,6 +286,7 @@
     <div class="elapsed">ELAPSED &nbsp;<b id="elapsedVal">00:00</b></div>
   </div>
 
+  <!-- PIPELINE -->
   <div class="card">
     <div class="eyebrow">SCAN PROGRESS</div>
     <h3 class="section-title">Analysis pipeline</h3>
@@ -293,17 +302,20 @@
     </div>
   </div>
 
+  <!-- TERMINAL -->
   <div class="card">
     <div class="term-hdr"><span class="dot"></span><span>LIVE ANALYSIS TERMINAL</span></div>
     <div id="terminal"><div class="l"><span class="tag">[SYSTEM]</span> READY Waiting for scan request...</div></div>
   </div>
 
+  <!-- MODULES -->
   <div class="card">
     <div class="eyebrow">SECURITY MODULES</div>
     <h3 class="section-title">Analysis modules</h3>
     <div class="modules" id="modules"></div>
   </div>
 
+  <!-- FINAL ASSESSMENT -->
   <div class="card">
     <div class="eyebrow">FINAL ASSESSMENT</div>
     <h3 class="section-title">Security result</h3>
@@ -317,12 +329,14 @@
     </div>
   </div>
 
+  <!-- HISTORY -->
   <div class="card">
     <div class="eyebrow">LOCAL HISTORY</div>
     <h3 class="section-title">Previous analyses</h3>
     <div id="historyList" style="font-size:12px;color:var(--dim);">No previous analyses.</div>
   </div>
 
+  <!-- DISCLAIMER -->
   <div class="card disclaimer">
     <div class="eyebrow">IMPORTANT</div>
     This service performs passive and limited automated checks. A low-risk result does not guarantee that a website is completely safe, trustworthy or free from malicious content.
@@ -359,6 +373,7 @@
   });
 
   let scanning = false;
+  let currentES = null;
   let startTime = null;
   let elapsedTimer = null;
   let scanId = null;
@@ -408,6 +423,7 @@
 
   function stopScan() {
     scanning = false;
+    if (currentES) { currentES.close(); currentES = null; }
     clearInterval(elapsedTimer);
     log('taramayı iptal ettiniz.', 'warn');
     document.getElementById('startBtn').disabled = false;
@@ -429,130 +445,87 @@
     document.getElementById('verdictBadge').className = 'verdict-badge';
     startElapsed();
 
-    log(`hedef alındı: ${url}`);
     pct(5); setStage('init', 'active');
-    await sleep(200);
-    setStage('init', 'done'); setStage('net', 'active'); pct(15);
 
-    let hostname;
-    try { hostname = new URL(url).hostname; } catch { hostname = url; }
+    const MODULE_STAGE = {
+      domain: 'net', dns: 'net', tls: 'sec', http: 'net', redirect: 'net',
+      headers: 'sec', cookies: 'sec', forms: 'ana', js: 'ana',
+      resources: 'ana', privacy: 'ana', sitemap: 'ana', threat: 'rep'
+    };
+    let doneCount = 0;
+    let hostnameOut = url;
 
-    log('sunucudan tam analiz isteniyor...');
-    let data = null;
-    try {
-      const res = await fetch('/api/check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-      });
-      data = await res.json();
-      if (data.error) throw new Error(data.error);
-    } catch (e) {
-      log('hata: ' + e.message, 'bad');
+    const es = new EventSource('/api/check-stream?url=' + encodeURIComponent(url));
+    currentES = es;
+
+    es.addEventListener('log', (e) => {
+      const d = JSON.parse(e.data);
+      log(d.text, d.level);
+    });
+
+    es.addEventListener('module', (e) => {
+      const d = JSON.parse(e.data);
+      if (d.id === 'threat_partial') return; // sadece log icin kullanilir, kart yok
+      setStage('init', 'done');
+      const stg = MODULE_STAGE[d.id];
+      if (stg) setStage(stg, 'active');
+      setModule(d.id, 'done', d.result);
+      doneCount++;
+      pct(Math.min(10 + Math.round((doneCount / 13) * 80), 90));
+    });
+
+    es.addEventListener('final', (e) => {
+      const d = JSON.parse(e.data);
+      hostnameOut = d.hostname;
+      pct(100);
+      ['init','net','sec','ana','rep'].forEach(s => setStage(s, 'done'));
+
+      document.getElementById('finalScore').textContent = d.score;
+      const badge = document.getElementById('verdictBadge');
+      if (d.score >= 70) { badge.textContent = 'GÜVENİLİR'; badge.className = 'verdict-badge ok'; }
+      else if (d.score >= 40) { badge.textContent = 'ŞÜPHELİ'; badge.className = 'verdict-badge mid'; }
+      else { badge.textContent = 'RİSKLİ'; badge.className = 'verdict-badge bad'; }
+
+      document.getElementById('finalText').textContent =
+        `${d.hostname} için tarama tamamlandı. Skor: ${d.score}/100.`;
+
+      const recos = [];
+      if (d.ssl && !d.ssl.valid) recos.push('SSL sertifikası sorunlu — bu siteye hassas bilgi girmeyin.');
+      if (d.safeBrowsing?.checked && !d.safeBrowsing.clean) recos.push('Bu site bilinen bir tehdit listesinde — erişmemenizi öneririz.');
+      if (d.domainAge?.risky) recos.push('Domain çok yeni açılmış — temkinli olun.');
+      if (d.formsRisky > 0) recos.push('Şifre formu HTTPS olmadan gönderiliyor — bilgilerinizi girmeyin.');
+      if (d.headersMissing >= 3) recos.push('Tarayıcı güvenlik başlıkları eksik.');
+      if (recos.length === 0) recos.push('Belirgin bir risk sinyali tespit edilmedi, yine de dikkatli olun.');
+      document.getElementById('recoList').innerHTML = recos.map(r => `<li>${r}</li>`).join('');
+
+      document.getElementById('agentTitle').textContent = 'Scan complete';
+      document.getElementById('statusLine').textContent = 'Tarama tamamlandı.';
+      clearInterval(elapsedTimer);
+
+      const hist = document.getElementById('historyList');
+      if (hist.textContent.includes('No previous')) hist.innerHTML = '';
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-family:ui-monospace,Menlo,monospace;';
+      row.innerHTML = `<span style="color:var(--text)">${d.hostname}</span><span style="color:var(--mint)">${d.score}/100</span>`;
+      hist.prepend(row);
+    });
+
+    es.addEventListener('done', () => {
+      es.close();
+      scanning = false;
+      document.getElementById('startBtn').disabled = false;
+    });
+
+    es.addEventListener('error', (e) => {
+      let msg = 'bağlantı hatası';
+      try { msg = JSON.parse(e.data).message; } catch {}
+      log('hata: ' + msg, 'bad');
       document.getElementById('statusLine').textContent = 'Tarama başarısız.';
+      es.close();
       scanning = false;
       document.getElementById('startBtn').disabled = false;
       clearInterval(elapsedTimer);
-      return;
-    }
-
-    const m = data.modules;
-    setStage('net', 'done'); setStage('sec', 'active'); pct(35);
-
-    setModule('domain', 'active'); await sleep(150);
-    setModule('domain', 'done', `host: ${m.domain.finalHost}`);
-    log(`domain: ${m.domain.finalHost}`);
-
-    setModule('dns', 'active'); await sleep(150);
-    setModule('dns', 'done', m.dns.checked ? `${m.dns.a.length} A kaydı` : 'çözümlenemedi');
-    log(m.dns.checked ? 'dns çözümlendi' : 'dns hatası', m.dns.checked ? null : 'warn');
-
-    setModule('tls', 'active'); await sleep(150);
-    setModule('tls', 'done', m.tls.valid ? `geçerli, ${m.tls.issuer || ''}` : 'geçersiz/tespit edilemedi');
-    log(m.tls.valid ? 'ssl geçerli' : 'ssl sorunlu', m.tls.valid ? null : 'warn');
-    pct(50);
-
-    setModule('http', 'active'); await sleep(150);
-    setModule('http', 'done', `${m.http.status} · ${m.http.hops} hop`);
-    log(`http yanıtı: ${m.http.status}`);
-
-    setModule('redirect', 'active'); await sleep(150);
-    setModule('redirect', 'done', m.redirect.chain.length > 1 ? `${m.redirect.chain.length} adım` : 'yönlendirme yok');
-
-    setStage('sec', 'done'); setStage('ana', 'active'); pct(65);
-
-    setModule('headers', 'active'); await sleep(150);
-    setModule('headers', 'done', `${m.headers.missing.length} eksik başlık`);
-    log(m.headers.missing.length > 0 ? `eksik başlıklar: ${m.headers.missing.join(', ')}` : 'tüm güvenlik başlıkları mevcut',
-        m.headers.missing.length > 0 ? 'warn' : null);
-
-    setModule('cookies', 'active'); await sleep(150);
-    setModule('cookies', 'done', `${m.cookies.count} çerez, ${m.cookies.issues.length} uyarı`);
-
-    setModule('forms', 'active'); await sleep(150);
-    setModule('forms', 'done', `${m.forms.count} form${m.forms.riskyOverHttp > 0 ? ' · HTTP üzerinden şifre!' : ''}`);
-    if (m.forms.riskyOverHttp > 0) log('şifre formu HTTPS olmadan tespit edildi!', 'bad');
-
-    setModule('js', 'active'); await sleep(150);
-    setModule('js', 'done', `${m.js.externalDomains.length} dış script kaynağı`);
-
-    setModule('resources', 'active'); await sleep(150);
-    setModule('resources', 'done', `${m.resources.count} kaynak, ${m.resources.externalDomains.length} dış alan`);
-
-    setModule('privacy', 'active'); await sleep(150);
-    setModule('privacy', 'done', `${m.privacy.thirdPartyDomainCount} üçüncü taraf alan`);
-
-    setModule('sitemap', 'active'); await sleep(150);
-    setModule('sitemap', 'done', m.sitemap.checked ? (m.sitemap.found ? 'bulundu' : 'bulunamadı') : 'kontrol edilemedi');
-
-    const sb = data.layer1.safeBrowsing;
-    setModule('threat', 'active');
-    log('kara liste taranıyor...');
-    await sleep(200);
-    setModule('threat', 'done', `${m.threat.findings.length} bulgu`);
-    m.threat.findings.forEach(f => log(f.text, f.level === 'bad' ? 'bad' : 'warn'));
-    if (sb.checked && !sb.clean) log('tehdit tespit edildi!', 'bad');
-    else log('kara listede kayıt yok');
-
-    pct(90); setStage('ana', 'done'); setStage('rep', 'active');
-    await sleep(200);
-    pct(100); setStage('rep', 'done');
-
-    const age = data.layer1.domainAge;
-    const ssl = m.tls;
-    let score = data.score;
-    document.getElementById('finalScore').textContent = score;
-    const badge = document.getElementById('verdictBadge');
-    if (score >= 70) { badge.textContent = 'GÜVENİLİR'; badge.className = 'verdict-badge ok'; }
-    else if (score >= 40) { badge.textContent = 'ŞÜPHELİ'; badge.className = 'verdict-badge mid'; }
-    else { badge.textContent = 'RİSKLİ'; badge.className = 'verdict-badge bad'; }
-
-    document.getElementById('finalText').textContent =
-      `${m.domain.finalHost} için tarama tamamlandı. Skor: ${score}/100.`;
-
-    const recos = [];
-    if (ssl && !ssl.valid) recos.push('SSL sertifikası sorunlu — bu siteye hassas bilgi girmeyin.');
-    if (sb?.checked && !sb.clean) recos.push('Bu site bilinen bir tehdit listesinde — erişmemenizi öneririz.');
-    if (age?.risky) recos.push('Domain çok yeni açılmış — temkinli olun.');
-    if (m.forms.riskyOverHttp > 0) recos.push('Şifre formu HTTPS olmadan gönderiliyor — bilgilerinizi girmeyin.');
-    if (m.headers.missing.length >= 3) recos.push('Tarayıcı güvenlik başlıkları eksik.');
-    if (recos.length === 0) recos.push('Belirgin bir risk sinyali tespit edilmedi, yine de dikkatli olun.');
-    document.getElementById('recoList').innerHTML = recos.map(r => `<li>${r}</li>`).join('');
-
-    document.getElementById('agentTitle').textContent = 'Scan complete';
-    document.getElementById('statusLine').textContent = 'Tarama tamamlandı.';
-    log('tarama tamamlandı.');
-    clearInterval(elapsedTimer);
-
-    const hist = document.getElementById('historyList');
-    if (hist.textContent.includes('No previous')) hist.innerHTML = '';
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-family:ui-monospace,Menlo,monospace;';
-    row.innerHTML = `<span style="color:var(--text)">${m.domain.finalHost}</span><span style="color:var(--mint)">${score}/100</span>`;
-    hist.prepend(row);
-
-    scanning = false;
-    document.getElementById('startBtn').disabled = false;
+    });
   }
 
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
