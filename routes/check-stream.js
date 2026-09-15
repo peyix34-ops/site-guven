@@ -7,11 +7,16 @@ const { checkDomainAge } = require('../services/domainAge');
 const {
   resolveDns, fetchWithRedirects, checkSecurityHeaders,
   analyzeCookies, analyzeForms, analyzeScripts,
-  analyzeResources, privacySurface, checkSitemap
+  analyzeResources, privacySurface, checkSitemap,
+  checkRobots, checkCertTransparency, checkEmailSecurity,
+  extractInternalLinks, crawlPage
 } = require('../services/analyze');
 
+// GET /api/check-stream?url=... - EventSource ile gercek zamanli akis
+// Her modul GERCEKTEN tamamlandigi anda event olarak gonderilir - sahte gecikme yok
 router.get('/', async (req, res) => {
   const url = req.query.url;
+  const level = req.query.level === 'kapsamli' ? 'kapsamli' : 'temel';
   if (!url) return res.status(400).end();
 
   let hostname;
@@ -34,6 +39,8 @@ router.get('/', async (req, res) => {
 
   try {
     send('log', { text: `hedef alındı: ${url}`, ms: elapsed() });
+
+    // Once sayfayi cek - digerlerinin cogu buna bagli, bu yuzden once bu bitmeli
     send('log', { text: 'sunucuya bağlanılıyor...', ms: elapsed() });
     const fetched = await fetchWithRedirects(url);
     const finalHost = new URL(fetched.finalUrl).hostname;
@@ -43,6 +50,8 @@ router.get('/', async (req, res) => {
     send('module', { id: 'redirect', done: true, ms: elapsed(), result: fetched.chain.length > 1 ? `${fetched.chain.length} adım` : 'yönlendirme yok' });
     send('log', { text: `http yanıtı alındı: ${fetched.status}`, ms: elapsed() });
 
+    // Bundan sonraki kontroller birbirinden bagimsiz - GERCEKTEN paralel calisir,
+    // her biri bittigi anda kendi eventini gonderir (kim once biterse o once gorunur)
     const tasks = [];
 
     tasks.push(checkSafeBrowsing(url).then(r => {
@@ -73,6 +82,7 @@ router.get('/', async (req, res) => {
       return r;
     }));
 
+    // Bunlar zaten indirilmis HTML uzerinde calisiyor, gercekten hizli ama yine de gercek islem
     const headers = checkSecurityHeaders(fetched.headers);
     send('module', { id: 'headers', done: true, ms: elapsed(), result: `${headers.missing.length} eksik başlık` });
     send('log', { text: headers.missing.length > 0 ? `eksik başlıklar: ${headers.missing.join(', ')}` : 'tüm güvenlik başlıkları mevcut', ms: elapsed(), level: headers.missing.length > 0 ? 'warn' : null });
@@ -93,6 +103,7 @@ router.get('/', async (req, res) => {
     const privacy = privacySurface(finalHost, scripts, resources, forms);
     send('module', { id: 'privacy', done: true, ms: elapsed(), result: `${privacy.thirdPartyDomainCount} üçüncü taraf alan` });
 
+    // Paralel gorevlerin GERCEKTEN bitmesini bekle
     const [safeBrowsing, ssl, domainAge] = await Promise.all(tasks);
 
     const threats = [];
@@ -116,12 +127,62 @@ router.get('/', async (req, res) => {
     if (cookies.issues.length > 0) score -= 5;
     score = Math.max(score, 0);
 
+    let deepScore = score;
+    let deepFormsRisky = forms.riskyOverHttp;
+
+    if (level === 'kapsamli') {
+      send('log', { text: 'kapsamlı mod: ek kontroller başlıyor (bu daha uzun sürer)...', ms: elapsed() });
+
+      // 14 - robots.txt
+      const robots = await checkRobots(fetched.finalUrl);
+      send('module', { id: 'robots', done: true, ms: elapsed(), result: robots.checked ? (robots.found ? `bulundu, ${robots.disallowedCount} kısıtlama` : 'bulunamadı') : 'kontrol edilemedi' });
+
+      // 15 - sertifika seffafligi (crt.sh sorgusu gercekten birkaç saniye surer)
+      send('log', { text: 'sertifika şeffaflık kayıtları sorgulanıyor (crt.sh)...', ms: elapsed() });
+      const certT = await checkCertTransparency(finalHost);
+      send('module', { id: 'subdomains', done: true, ms: elapsed(), result: certT.checked ? `${certT.subdomainCount} alt alan adı kaydı` : 'sorgulanamadı' });
+      if (certT.checked) send('log', { text: `${certT.subdomainCount} alt alan adı sertifika kayıtlarında bulundu`, ms: elapsed() });
+
+      // 16 - e-posta guvenligi (SPF/DMARC)
+      const emailSec = await checkEmailSecurity(finalHost);
+      send('module', { id: 'email_security', done: true, ms: elapsed(), result: `SPF: ${emailSec.spf ? 'var' : 'yok'} · DMARC: ${emailSec.dmarc ? 'var' : 'yok'}` });
+      if (!emailSec.spf || !emailSec.dmarc) send('log', { text: 'e-posta sahteciliğine karşı koruma eksik (SPF/DMARC)', ms: elapsed(), level: 'warn' });
+
+      // 17 - ic sayfa taramasi: bulunan ic linkleri GERCEKTEN teker teker ziyaret et
+      const internalLinks = extractInternalLinks(fetched.html, fetched.finalUrl, finalHost, 6);
+      send('log', { text: `${internalLinks.length} iç sayfa bulundu, tek tek ziyaret ediliyor...`, ms: elapsed() });
+
+      let crawledCount = 0;
+      let totalMixed = 0;
+      let totalRiskyForms = 0;
+      for (const link of internalLinks) {
+        const pageResult = await crawlPage(link);
+        crawledCount++;
+        if (pageResult.checked) {
+          totalMixed += pageResult.mixedContent;
+          totalRiskyForms += pageResult.formsRisky;
+          send('log', { text: `iç sayfa tarandı (${crawledCount}/${internalLinks.length}): ${link} · ${pageResult.status}`, ms: elapsed() });
+        } else {
+          send('log', { text: `iç sayfa taranamadı: ${link}`, ms: elapsed(), level: 'warn' });
+        }
+      }
+      send('module', { id: 'crawl', done: true, ms: elapsed(), result: `${crawledCount} sayfa tarandı, ${totalMixed} karışık içerik uyarısı` });
+      if (totalMixed > 0) send('log', { text: `${totalMixed} karışık içerik (http kaynak, https sayfa) tespit edildi`, ms: elapsed(), level: 'warn' });
+
+      deepFormsRisky += totalRiskyForms;
+      if (!emailSec.spf || !emailSec.dmarc) deepScore -= 5;
+      if (totalMixed > 0) deepScore -= 10;
+      if (totalRiskyForms > 0) deepScore -= 10;
+      deepScore = Math.max(deepScore, 0);
+    }
+
     send('final', {
       hostname: finalHost,
-      score,
+      score: deepScore,
       ssl, domainAge, safeBrowsing,
       headersMissing: headers.missing.length,
-      formsRisky: forms.riskyOverHttp
+      formsRisky: deepFormsRisky,
+      level
     });
     send('log', { text: `tarama tamamlandı (${(elapsed() / 1000).toFixed(1)}s)`, ms: elapsed() });
     send('done', {});
