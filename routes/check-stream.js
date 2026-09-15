@@ -9,11 +9,13 @@ const {
   analyzeCookies, analyzeForms, analyzeScripts,
   analyzeResources, privacySurface, checkSitemap,
   checkRobots, checkCertTransparency, checkEmailSecurity,
-  extractInternalLinks, crawlPage
+  extractInternalLinks, crawlPage, detectDownloadLinks
 } = require('../services/analyze');
 
 // GET /api/check-stream?url=... - EventSource ile gercek zamanli akis
 // Her modul GERCEKTEN tamamlandigi anda event olarak gonderilir - sahte gecikme yok
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
 router.get('/', async (req, res) => {
   const url = req.query.url;
   const level = req.query.level === 'kapsamli' ? 'kapsamli' : 'temel';
@@ -134,16 +136,26 @@ router.get('/', async (req, res) => {
       send('log', { text: 'kapsamlı mod: ek kontroller başlıyor (bu daha uzun sürer)...', ms: elapsed() });
 
       // 14 - robots.txt
+      await sleep(500);
       const robots = await checkRobots(fetched.finalUrl);
       send('module', { id: 'robots', done: true, ms: elapsed(), result: robots.checked ? (robots.found ? `bulundu, ${robots.disallowedCount} kısıtlama` : 'bulunamadı') : 'kontrol edilemedi' });
+
+      // 14b - calistirilabilir dosya indirme linki tespiti (apk/exe/msi vb.)
+      await sleep(400);
+      const downloads = detectDownloadLinks(fetched.html, fetched.finalUrl);
+      if (downloads.count > 0) {
+        send('log', { text: `${downloads.count} çalıştırılabilir dosya indirme linki tespit edildi (.apk/.exe vb.)`, ms: elapsed(), level: 'warn' });
+      }
 
       // 15 - sertifika seffafligi (crt.sh sorgusu gercekten birkaç saniye surer)
       send('log', { text: 'sertifika şeffaflık kayıtları sorgulanıyor (crt.sh)...', ms: elapsed() });
       const certT = await checkCertTransparency(finalHost);
+      await sleep(500);
       send('module', { id: 'subdomains', done: true, ms: elapsed(), result: certT.checked ? `${certT.subdomainCount} alt alan adı kaydı` : 'sorgulanamadı' });
       if (certT.checked) send('log', { text: `${certT.subdomainCount} alt alan adı sertifika kayıtlarında bulundu`, ms: elapsed() });
 
       // 16 - e-posta guvenligi (SPF/DMARC)
+      await sleep(500);
       const emailSec = await checkEmailSecurity(finalHost);
       send('module', { id: 'email_security', done: true, ms: elapsed(), result: `SPF: ${emailSec.spf ? 'var' : 'yok'} · DMARC: ${emailSec.dmarc ? 'var' : 'yok'}` });
       if (!emailSec.spf || !emailSec.dmarc) send('log', { text: 'e-posta sahteciliğine karşı koruma eksik (SPF/DMARC)', ms: elapsed(), level: 'warn' });
@@ -157,6 +169,7 @@ router.get('/', async (req, res) => {
       let totalRiskyForms = 0;
       for (const link of internalLinks) {
         const pageResult = await crawlPage(link);
+        await sleep(300);
         crawledCount++;
         if (pageResult.checked) {
           totalMixed += pageResult.mixedContent;
@@ -173,6 +186,7 @@ router.get('/', async (req, res) => {
       if (!emailSec.spf || !emailSec.dmarc) deepScore -= 5;
       if (totalMixed > 0) deepScore -= 10;
       if (totalRiskyForms > 0) deepScore -= 10;
+      if (downloads.count > 0) deepScore -= 20;
       deepScore = Math.max(deepScore, 0);
     }
 
