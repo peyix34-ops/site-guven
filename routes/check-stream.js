@@ -64,14 +64,18 @@ router.get('/', async (req, res) => {
     }));
 
     let virusTotalResult = { checked: false };
-    tasks.push(checkVirusTotal(url).then(r => {
+    send('log', { text: 'VirusTotal sorgulanıyor (yeni siteyse gerçek sonuç için biraz beklenecek)...', ms: elapsed() });
+    tasks.push(checkVirusTotal(url, level, (attempt, maxAttempts) => {
+      send('log', { text: `VirusTotal sonucu bekleniyor (${attempt}/${maxAttempts})...`, ms: elapsed() });
+    }).then(r => {
       virusTotalResult = r;
       if (r.checked && !r.pending) {
         send('module', { id: 'virustotal', done: true, ms: elapsed(), result: `${r.malicious} zararlı / ${r.total} motor` });
         if (r.malicious > 0) send('log', { text: `VirusTotal: ${r.malicious} antivirüs motoru bu siteyi zararlı işaretledi`, ms: elapsed(), level: 'bad' });
         else send('log', { text: 'VirusTotal: hiçbir motor zararlı işaretlemedi', ms: elapsed() });
-      } else if (r.checked && r.pending) {
-        send('module', { id: 'virustotal', done: true, ms: elapsed(), result: 'ilk kez taranıyor, sonuç bekleniyor' });
+      } else if (r.checked && r.pending && r.timedOut) {
+        send('module', { id: 'virustotal', done: true, ms: elapsed(), result: 'sonuç zaman aşımına uğradı, VirusTotal.com üzerinden elle kontrol edilebilir' });
+        send('log', { text: 'VirusTotal sonucu bu süre içinde tamamlanmadı (site yeni olabilir)', ms: elapsed(), level: 'warn' });
       } else {
         send('module', { id: 'virustotal', done: true, ms: elapsed(), result: 'kontrol edilemedi' });
       }
