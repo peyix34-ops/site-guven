@@ -371,4 +371,19 @@ module.exports.checkCertTransparency = checkCertTransparency;
 module.exports.checkEmailSecurity = checkEmailSecurity;
 module.exports.extractInternalLinks = extractInternalLinks;
 module.exports.crawlPage = crawlPage;
-                 
+
+// 18 - Calistirilabilir dosya indirme linki tespiti (apk/exe/msi vb.) - gercek bir risk sinyali
+function detectDownloadLinks(html, baseUrl) {
+  const $ = cheerio.load(html);
+  const riskyExt = /\.(apk|exe|msi|dmg|bat|sh|scr|jar)(\?|$)/i;
+  const found = [];
+  $('a[href]').each((i, el) => {
+    const href = $(el).attr('href') || '';
+    if (riskyExt.test(href)) {
+      try { found.push(new URL(href, baseUrl).toString()); } catch { found.push(href); }
+    }
+  });
+  return { checked: true, count: found.length, links: found.slice(0, 10) };
+}
+
+module.exports.detectDownloadLinks = detectDownloadLinks;
