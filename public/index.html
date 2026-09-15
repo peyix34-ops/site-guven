@@ -85,6 +85,21 @@
     margin-bottom: 5px;
   }
 
+  .mode-row { display: flex; gap: 6px; margin-bottom: 4px; }
+  .mode-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--dim);
+    padding: 8px;
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+  }
+  .mode-btn.active { border-color: var(--ice); color: var(--ice); }
+  .mode-desc { font-size: 9.5px; color: var(--dim); margin-bottom: 12px; }
+
   #url {
     width: 100%;
     background: var(--bg);
@@ -246,6 +261,12 @@
     <p>Bağlantı, DNS, sertifika, başlık, çerez, form ve kaynak sinyalleri incelenir. Sonuç bir tahmindir, kesin garanti değildir.</p>
     <div class="field-label">ADRES</div>
     <input id="url" placeholder="https://ornek.com" autocomplete="off" />
+    <div class="field-label" style="margin-top:2px;">MOD</div>
+    <div class="mode-row">
+      <button class="mode-btn active" id="modeHizli" onclick="setMode('temel')">HIZLI</button>
+      <button class="mode-btn" id="modeKapsamli" onclick="setMode('kapsamli')">KAPSAMLI</button>
+    </div>
+    <div class="mode-desc" id="modeDesc">Temel kontroller, birkaç saniye sürer.</div>
     <button class="btn btn-start" id="startBtn" onclick="startScan()">TARAMAYI BAŞLAT</button>
     <button class="btn btn-stop" id="stopBtn" onclick="stopScan()">DURDUR</button>
   </div>
@@ -319,7 +340,7 @@
   </div>
 
 <script>
-  const MODULES = [
+  const MODULES_BASE = [
     { id: 'domain', n: '01', title: 'Alan Adı Bilgisi', desc: 'Hedef adres, protokol, port.' },
     { id: 'dns', n: '02', title: 'DNS Çözümleme', desc: 'DNS kayıtları ve ağ adresi.' },
     { id: 'tls', n: '03', title: 'SSL Sertifikası', desc: 'HTTPS bağlantısı ve sertifika.' },
@@ -335,18 +356,42 @@
     { id: 'threat', n: '13', title: 'Tehdit Sinyalleri', desc: 'Toplam bulgu özeti.' }
   ];
 
-  const modulesEl = document.getElementById('modules');
-  MODULES.forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'module';
-    div.id = 'mod-' + m.id;
-    div.innerHTML = `
-      <div class="mrow"><span>${m.n}</span><span class="mstatus">BEKLİYOR</span></div>
-      <h4>${m.title}</h4>
-      <p>${m.desc}</p>
-      <div class="result" style="display:none;"></div>`;
-    modulesEl.appendChild(div);
-  });
+  const MODULES_DEEP = [
+    { id: 'robots', n: '14', title: 'robots.txt', desc: 'Arama motoru kısıtlama kuralları.' },
+    { id: 'subdomains', n: '15', title: 'Sertifika Şeffaflığı', desc: 'Kayıtlı alt alan adları (crt.sh).' },
+    { id: 'email_security', n: '16', title: 'E-posta Güvenliği', desc: 'SPF / DMARC kayıt kontrolü.' },
+    { id: 'crawl', n: '17', title: 'İç Sayfa Taraması', desc: 'Bulunan iç sayfalar tek tek ziyaret edilir.' }
+  ];
+
+  let currentMode = 'temel';
+
+  function renderModules(list) {
+    const modulesEl = document.getElementById('modules');
+    modulesEl.innerHTML = '';
+    list.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'module';
+      div.id = 'mod-' + m.id;
+      div.innerHTML = `
+        <div class="mrow"><span>${m.n}</span><span class="mstatus">BEKLİYOR</span></div>
+        <h4>${m.title}</h4>
+        <p>${m.desc}</p>
+        <div class="result" style="display:none;"></div>`;
+      modulesEl.appendChild(div);
+    });
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('modeHizli').classList.toggle('active', mode === 'temel');
+    document.getElementById('modeKapsamli').classList.toggle('active', mode === 'kapsamli');
+    document.getElementById('modeDesc').textContent = mode === 'kapsamli'
+      ? 'İç sayfaları tek tek ziyaret eder, sertifika kayıtlarını ve e-posta güvenliğini sorgular. En az 1 dakika sürer.'
+      : 'Temel kontroller, birkaç saniye sürer.';
+    renderModules(mode === 'kapsamli' ? [...MODULES_BASE, ...MODULES_DEEP] : MODULES_BASE);
+  }
+
+  renderModules(MODULES_BASE);
 
   let scanning = false;
   let startTime = null;
@@ -430,7 +475,7 @@
     };
     let doneCount = 0;
 
-    const es = new EventSource('/api/check-stream?url=' + encodeURIComponent(url));
+    const es = new EventSource('/api/check-stream?url=' + encodeURIComponent(url) + '&level=' + currentMode);
     currentES = es;
 
     es.addEventListener('log', (e) => {
