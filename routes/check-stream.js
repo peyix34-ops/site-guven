@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { checkSafeBrowsing } = require('../services/safeBrowsing');
+const { checkVirusTotal } = require('../services/virustotal');
 const { checkSSL } = require('../services/sslCheck');
 const { checkDomainAge } = require('../services/domainAge');
 const {
@@ -62,6 +63,21 @@ router.get('/', async (req, res) => {
       return r;
     }));
 
+    let virusTotalResult = { checked: false };
+    tasks.push(checkVirusTotal(url).then(r => {
+      virusTotalResult = r;
+      if (r.checked && !r.pending) {
+        send('module', { id: 'virustotal', done: true, ms: elapsed(), result: `${r.malicious} zararlı / ${r.total} motor` });
+        if (r.malicious > 0) send('log', { text: `VirusTotal: ${r.malicious} antivirüs motoru bu siteyi zararlı işaretledi`, ms: elapsed(), level: 'bad' });
+        else send('log', { text: 'VirusTotal: hiçbir motor zararlı işaretlemedi', ms: elapsed() });
+      } else if (r.checked && r.pending) {
+        send('module', { id: 'virustotal', done: true, ms: elapsed(), result: 'ilk kez taranıyor, sonuç bekleniyor' });
+      } else {
+        send('module', { id: 'virustotal', done: true, ms: elapsed(), result: 'kontrol edilemedi' });
+      }
+      return r;
+    }));
+
     tasks.push(checkSSL(hostname).then(r => {
       send('module', { id: 'tls', done: true, ms: elapsed(), result: r.valid ? `geçerli, ${r.issuer || ''}` : 'geçersiz/tespit edilemedi', raw: r });
       send('log', { text: r.valid ? 'ssl sertifikası geçerli' : 'ssl sertifikası sorunlu', ms: elapsed(), level: r.valid ? null : 'warn' });
@@ -116,6 +132,7 @@ router.get('/', async (req, res) => {
     if (forms.riskyOverHttp > 0) threats.push({ level: 'bad', text: 'Sifre formu HTTPS olmadan gonderiliyor' });
     if (cookies.issues.length > 0) threats.push({ level: 'mid', text: 'Cerezlerde guvenlik bayragi eksikleri var' });
     if (fetched.chain.length > 3) threats.push({ level: 'mid', text: 'Cok sayida yonlendirme zinciri' });
+    if (virusTotalResult.checked && virusTotalResult.malicious > 0) threats.push({ level: 'bad', text: `VirusTotal: ${virusTotalResult.malicious} antivirus motoru zararli isaretledi` });
 
     send('module', { id: 'threat', done: true, ms: elapsed(), result: `${threats.length} bulgu` });
     threats.forEach(f => send('log', { text: f.text, ms: elapsed(), level: f.level }));
@@ -127,6 +144,7 @@ router.get('/', async (req, res) => {
     if (headers.missing.length >= 3) score -= 10;
     if (forms.riskyOverHttp > 0) score -= 15;
     if (cookies.issues.length > 0) score -= 5;
+    if (virusTotalResult.checked && virusTotalResult.malicious > 0) score -= Math.min(virusTotalResult.malicious * 10, 50);
     score = Math.max(score, 0);
 
     let deepScore = score;
