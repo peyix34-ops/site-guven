@@ -22,35 +22,44 @@ Gorevin:
 
 Cevabini sadece degerlendirme metni olarak ver, baslik ya da madde isareti kullanma, duz paragraf yaz.`;
 
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          tools: [{ google_search: {} }]
-        }),
-        timeout: 25000
+  // Google model isimlerini siklikla degistiriyor/kaldiriyor - birden fazla ismi sirayla dene
+  const modelCandidates = ['gemini-flash-latest', 'gemini-3.8-flash', 'gemini-2.5-flash'];
+
+  let lastError = 'bilinmeyen hata';
+  for (const model of modelCandidates) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            tools: [{ google_search: {} }]
+          }),
+          timeout: 25000
+        }
+      );
+
+      if (!res.ok) {
+        const errText = await res.text();
+        lastError = `${model}: ${res.status} ${errText.slice(0, 120)}`;
+        continue; // bu model calismadi, siradakini dene
       }
-    );
 
-    if (!res.ok) {
-      const errText = await res.text();
-      return { checked: false, reason: `Gemini hata: ${res.status} ${errText.slice(0, 150)}` };
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+      const groundingUsed = !!data.candidates?.[0]?.groundingMetadata;
+
+      if (!text) { lastError = `${model}: bos yanit`; continue; }
+
+      return { checked: true, text: text.trim(), groundingUsed, modelUsed: model };
+    } catch (err) {
+      lastError = `${model}: ${err.message}`;
     }
-
-    const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
-    const groundingUsed = !!data.candidates?.[0]?.groundingMetadata;
-
-    if (!text) return { checked: false, reason: 'Gemini bos yanit dondu' };
-
-    return { checked: true, text: text.trim(), groundingUsed };
-  } catch (err) {
-    return { checked: false, reason: err.message };
   }
+
+  return { checked: false, reason: 'Gemini hata: ' + lastError };
 }
 
 module.exports = { analyzeWithAI };
