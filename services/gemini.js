@@ -25,7 +25,7 @@ Cevabini sadece degerlendirme metni olarak ver, baslik ya da madde isareti kulla
   // Google model isimlerini siklikla degistiriyor/kaldiriyor - birden fazla ismi sirayla dene
   const modelCandidates = ['gemini-flash-latest', 'gemini-3.8-flash', 'gemini-2.5-flash'];
 
-  let lastError = 'bilinmeyen hata';
+  const allErrors = [];
   for (const model of modelCandidates) {
     try {
       const res = await fetch(
@@ -43,7 +43,7 @@ Cevabini sadece degerlendirme metni olarak ver, baslik ya da madde isareti kulla
 
       if (!res.ok) {
         const errText = await res.text();
-        lastError = `${model}: ${res.status} ${errText.slice(0, 120)}`;
+        allErrors.push(`${model}: ${res.status} ${errText.slice(0, 100)}`);
         continue; // bu model calismadi, siradakini dene
       }
 
@@ -51,15 +51,16 @@ Cevabini sadece degerlendirme metni olarak ver, baslik ya da madde isareti kulla
       const text = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
       const groundingUsed = !!data.candidates?.[0]?.groundingMetadata;
 
-      if (!text) { lastError = `${model}: bos yanit`; continue; }
+      if (!text) { allErrors.push(`${model}: bos yanit`); continue; }
 
       return { checked: true, text: text.trim(), groundingUsed, modelUsed: model };
     } catch (err) {
-      lastError = `${model}: ${err.message}`;
+      allErrors.push(`${model}: ${err.message}`);
     }
   }
 
-  return { checked: false, reason: 'Gemini hata: ' + lastError };
+  // Hepsi basarisiz oldu - HEPSININ hatasini goster, sadece sonuncusunu degil
+  return { checked: false, reason: 'Gemini - hicbir model calismadi: ' + allErrors.join(' | ') };
 }
 
 module.exports = { analyzeWithAI };
