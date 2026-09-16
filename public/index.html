@@ -316,6 +316,12 @@
   </div>
 
   <div class="card">
+    <div class="eyebrow">YAPAY ZEKA</div>
+    <h3 class="section-title">Web araştırmalı değerlendirme</h3>
+    <div id="aiResult" style="font-size:11px;color:var(--dim);line-height:1.7;">Tarama tamamlanınca burada görünecek.</div>
+  </div>
+
+  <div class="card">
     <div class="eyebrow">SONUÇ</div>
     <h3 class="section-title">Değerlendirme</h3>
     <div class="score-label">GÜVEN SKORU</div>
@@ -465,6 +471,8 @@
     document.getElementById('finalScore').textContent = '—';
     document.getElementById('verdictBadge').textContent = 'ÇALIŞIYOR';
     document.getElementById('verdictBadge').className = 'verdict-badge';
+    document.getElementById('aiResult').textContent = 'Araştırılıyor...';
+    document.getElementById('aiResult').style.color = 'var(--dim)';
     startElapsed();
 
     pct(5); setStage('init', 'active');
@@ -528,6 +536,24 @@
       row.className = 'hist-row';
       row.innerHTML = `<span>${d.hostname}</span><span>${d.score}/100</span>`;
       hist.prepend(row);
+    });
+
+    es.addEventListener('ai_result', (e) => {
+      const d = JSON.parse(e.data);
+      const el = document.getElementById('aiResult');
+      if (d.error) {
+        el.textContent = 'Yapay zeka değerlendirmesi alınamadı: ' + d.reason;
+        el.style.color = 'var(--danger)';
+      } else {
+        el.textContent = d.text;
+        el.style.color = 'var(--text)';
+        if (d.groundingUsed) {
+          const note = document.createElement('div');
+          note.style.cssText = 'margin-top:8px;font-size:9px;color:var(--dim);letter-spacing:0.05em;';
+          note.textContent = '(Google araması kullanılarak oluşturuldu)';
+          el.appendChild(note);
+        }
+      }
     });
 
     es.addEventListener('done', () => {
