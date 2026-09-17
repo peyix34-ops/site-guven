@@ -3,7 +3,6 @@ const router = express.Router();
 
 const { checkSafeBrowsing } = require('../services/safeBrowsing');
 const { checkVirusTotal } = require('../services/virustotal');
-const { analyzeWithAI } = require('../services/gemini');
 const { checkSSL } = require('../services/sslCheck');
 const { checkDomainAge } = require('../services/domainAge');
 const {
@@ -221,32 +220,6 @@ router.get('/', async (req, res) => {
       formsRisky: deepFormsRisky,
       level
     });
-
-    // Yapay zeka yorumu - GERCEKTEN Google'da arama yaparak (grounding) - en son calisir,
-    // cunku onceki tum bulgulari ozetleyip Gemini'ye gonderiyoruz
-    send('log', { text: 'yapay zeka değerlendirmesi hazırlanıyor (web araması yapılıyor)...', ms: elapsed() });
-    const scanSummary = [
-      `Kara liste (Safe Browsing): ${safeBrowsing.checked ? (safeBrowsing.clean ? 'temiz' : 'tehdit bulundu') : 'kontrol edilemedi'}`,
-      `VirusTotal: ${virusTotalResult.checked && !virusTotalResult.pending ? `${virusTotalResult.malicious}/${virusTotalResult.total} motor zararli dedi` : 'sonuc alinamadi'}`,
-      `SSL sertifikasi: ${ssl.checked ? (ssl.valid ? 'gecerli' : 'gecersiz') : 'kontrol edilemedi'}`,
-      `Alan adi yasi: ${domainAge.checked ? `${domainAge.ageDays} gun` : 'bilinmiyor'}`,
-      `Guvenlik basliklari: ${headers.missing.length} tanesi eksik`,
-      `Form guvenligi: ${forms.riskyOverHttp > 0 ? 'sifre formu HTTPS olmadan gonderiliyor' : 'sorun yok'}`,
-      `Genel skor: ${deepScore}/100`
-    ].join('\n');
-
-    const aiResult = await analyzeWithAI(url, finalHost, scanSummary);
-    if (aiResult.checked) {
-      send('ai_result', { text: aiResult.text, groundingUsed: aiResult.groundingUsed, searchFailed: aiResult.searchFailed });
-      if (aiResult.searchFailed) {
-        send('log', { text: 'web araması şu an kullanılamadı (kota), yalnızca toplanan verilere göre yorumlandı', ms: elapsed(), level: 'warn' });
-      } else {
-        send('log', { text: 'yapay zeka web araması yaparak değerlendirme tamamladı', ms: elapsed() });
-      }
-    } else {
-      send('ai_result', { error: true, reason: aiResult.reason });
-      send('log', { text: 'yapay zeka değerlendirmesi alınamadı: ' + aiResult.reason, ms: elapsed(), level: 'warn' });
-    }
 
     send('log', { text: `tarama tamamlandı (${(elapsed() / 1000).toFixed(1)}s)`, ms: elapsed() });
     send('done', {});
