@@ -547,12 +547,14 @@
       } else {
         el.textContent = d.text;
         el.style.color = 'var(--text)';
-        if (d.groundingUsed) {
-          const note = document.createElement('div');
-          note.style.cssText = 'margin-top:8px;font-size:9px;color:var(--dim);letter-spacing:0.05em;';
-          note.textContent = '(Google araması kullanılarak oluşturuldu)';
-          el.appendChild(note);
-        }
+        const note = document.createElement('div');
+        note.style.cssText = 'margin-top:8px;font-size:9px;color:var(--dim);letter-spacing:0.05em;';
+        note.textContent = d.searchFailed
+          ? '(Web araması şu an kullanılamadı, sadece tarama verilerine göre yorumlandı)'
+          : d.groundingUsed
+            ? '(Google araması kullanılarak oluşturuldu)'
+            : '';
+        if (note.textContent) el.appendChild(note);
       }
     });
 
