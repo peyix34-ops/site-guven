@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bu Site Güvenli mi? | Ücretsiz Web Güvenlik Taraması</title>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5067106051576372"
+     crossorigin="anonymous"></script>
+
 <style>
   :root {
     --bg: #f5f7fa;
@@ -40,6 +44,7 @@
     align-items: center;
     gap: 10px;
   }
+
   header .logo {
     width: 30px; height: 30px;
     background: var(--primary);
@@ -48,6 +53,7 @@
     color: #fff; font-weight: 700; font-size: 14px;
     flex-shrink: 0;
   }
+
   header h1 { font-size: 15px; margin: 0; font-weight: 700; }
   header .sub { font-size: 11px; color: var(--dim); }
 
@@ -99,10 +105,12 @@
     outline: none;
     margin-bottom: 16px;
   }
+
   #url::placeholder { color: #94a3b8; }
   #url:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(29,78,216,0.1); }
 
   .mode-row { display: flex; gap: 8px; margin-bottom: 6px; }
+
   .mode-btn {
     flex: 1;
     background: #fff;
@@ -115,6 +123,7 @@
     font-weight: 600;
     cursor: pointer;
   }
+
   .mode-btn.active { border-color: var(--primary); color: var(--primary); background: #eff4ff; }
   .mode-desc { font-size: 11.5px; color: var(--dim); margin-bottom: 20px; line-height: 1.5; }
 
@@ -128,6 +137,7 @@
     cursor: pointer;
     font-family: inherit;
   }
+
   .btn-start { background: var(--primary); color: #fff; margin-bottom: 10px; }
   .btn-start:hover { background: var(--primary-dark); }
   .btn-start:disabled { opacity: 0.4; cursor: default; }
@@ -138,6 +148,7 @@
     font-size: 11px; color: var(--dim); font-weight: 600;
     margin-bottom: 4px;
   }
+
   .agent-grid .val { color: var(--text); font-size: 12.5px; margin-top: 3px; font-family: var(--mono); }
 
   .progress-wrap { display: flex; justify-content: center; margin: 16px 0 4px; }
@@ -146,10 +157,12 @@
   .progress-ring circle { fill: none; stroke-width: 9; }
   .progress-ring .track { stroke: #eef2f7; }
   .progress-ring .fill { stroke: var(--primary); stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+
   .progress-ring .center {
     position: absolute; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
   }
+
   .progress-ring .center .n { font-size: 26px; font-weight: 800; color: var(--text); }
   .progress-ring .center .l { font-size: 9.5px; color: var(--dim); font-weight: 600; letter-spacing: 0.05em; }
 
@@ -160,7 +173,9 @@
   .bar-track { height: 6px; background: #eef2f7; border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
   .bar-fill { height: 100%; width: 0%; background: var(--primary); border-radius: 3px; transition: width 0.4s ease; }
   .status-line { font-size: 12px; color: var(--dim); margin-bottom: 14px; }
+
   .stages { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
   .stage {
     border: 1.5px solid var(--border);
     border-radius: 7px;
@@ -170,6 +185,7 @@
     color: var(--dim);
     background: #fff;
   }
+
   .stage.active { border-color: var(--primary); color: var(--primary); background: #eff4ff; }
   .stage.done { color: var(--safe); border-color: #bbf7d0; background: #f0fdf4; }
   .stage.done::after { content: " ✓"; }
@@ -178,6 +194,7 @@
   .term-hdr .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--safe); animation: blink 1.4s ease-in-out infinite; }
   @keyframes blink { 50% { opacity: 0.2; } }
   .term-hdr span { font-size: 11px; color: var(--dim); font-weight: 700; letter-spacing: 0.03em; }
+
   #terminal {
     background: #f8fafc;
     border: 1px solid var(--border);
@@ -190,19 +207,23 @@
     max-height: 200px;
     overflow-y: auto;
   }
+
   #terminal .l { color: var(--dim); }
   #terminal .l .tag { color: var(--primary); font-weight: 700; }
   #terminal .l.warn .tag { color: var(--mid); }
   #terminal .l.bad .tag { color: var(--danger); }
 
   h3.section-title { font-size: 15px; margin: 2px 0 12px; font-weight: 700; color: var(--text); }
+
   .modules { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
+
   .module {
     background: #fff;
     border: 1.5px solid var(--border);
     border-radius: 11px;
     padding: 15px 16px;
   }
+
   .module.active { border-color: var(--primary); background: #fafcff; }
   .module .mrow { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); margin-bottom: 6px; font-weight: 700; }
   .module .mstatus.done { color: var(--safe); }
@@ -215,6 +236,7 @@
   .score-num { font-size: 40px; font-weight: 800; color: var(--text); }
   .score-den { font-size: 13px; color: var(--dim); }
   .score-label { font-size: 11px; color: var(--dim); font-weight: 700; margin-bottom: 3px; }
+
   .verdict-badge {
     display: inline-block;
     border-radius: 20px;
@@ -224,6 +246,7 @@
     margin-top: 8px;
     background: #f1f5f9; color: var(--dim);
   }
+
   .verdict-badge.ok { background: #dcfce7; color: var(--safe); }
   .verdict-badge.mid { background: #fef3c7; color: var(--mid); }
   .verdict-badge.bad { background: #fee2e2; color: var(--danger); }
@@ -244,6 +267,7 @@
     font-size: 11px;
     color: #94a3b8;
   }
+
   footer a { color: var(--dim); }
 </style>
 </head>
@@ -489,6 +513,7 @@
       resources: 'ana', privacy: 'ana', sitemap: 'ana', threat: 'rep', virustotal: 'sec',
       robots: 'ana', subdomains: 'ana', email_security: 'ana', crawl: 'ana'
     };
+
     let doneCount = 0;
     const totalModules = currentMode === 'kapsamli' ? 18 : 14;
 
@@ -518,9 +543,19 @@
 
       document.getElementById('finalScore').textContent = d.score;
       const badge = document.getElementById('verdictBadge');
-      if (d.score >= 70) { badge.textContent = 'Güvenilir'; badge.className = 'verdict-badge ok'; }
-      else if (d.score >= 40) { badge.textContent = 'Şüpheli'; badge.className = 'verdict-badge mid'; }
-      else { badge.textContent = 'Riskli'; badge.className = 'verdict-badge bad'; }
+
+      if (d.score >= 70) {
+        badge.textContent = 'Güvenilir';
+        badge.className = 'verdict-badge ok';
+      }
+      else if (d.score >= 40) {
+        badge.textContent = 'Şüpheli';
+        badge.className = 'verdict-badge mid';
+      }
+      else {
+        badge.textContent = 'Riskli';
+        badge.className = 'verdict-badge bad';
+      }
 
       document.getElementById('finalText').textContent =
         `${d.hostname} için tarama tamamlandı. Skor: ${d.score}/100.`;
@@ -532,6 +567,7 @@
       if (d.formsRisky > 0) recos.push('Şifre formu HTTPS olmadan gönderiliyor.');
       if (d.headersMissing >= 3) recos.push('Tarayıcı güvenlik başlıkları eksik.');
       if (recos.length === 0) recos.push('Belirgin bir risk sinyali yok, yine de dikkatli olun.');
+
       document.getElementById('recoList').innerHTML = recos.map(r => `<li>${r}</li>`).join('');
 
       document.getElementById('agentTitle').textContent = 'Tamamlandı';
@@ -540,6 +576,7 @@
 
       const hist = document.getElementById('historyList');
       if (hist.textContent.includes('Kayıt yok')) hist.innerHTML = '';
+
       const row = document.createElement('div');
       row.className = 'hist-row';
       row.innerHTML = `<span>${d.hostname}</span><span>${d.score}/100</span>`;
