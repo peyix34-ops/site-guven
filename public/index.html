@@ -3,17 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bu Site Güvenli mi?</title>
+<title>Bu Site Güvenli mi? | Ücretsiz Web Güvenlik Taraması</title>
 <style>
   :root {
-    --bg: #050708;
-    --panel: #0a0d0f;
-    --line: #1c2226;
-    --text: #c4cdd2;
-    --dim: #55606a;
-    --ice: #7fb8c9;
-    --danger: #b5544d;
-    --amber: #b89a5a;
+    --bg: #f5f7fa;
+    --panel: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --dim: #64748b;
+    --primary: #1d4ed8;
+    --primary-dark: #1e3a8a;
+    --safe: #16a34a;
+    --mid: #d97706;
+    --danger: #dc2626;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
 
   * { box-sizing: border-box; }
@@ -21,323 +24,325 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
     max-width: 620px;
     margin: 0 auto;
-    padding: 18px 14px 50px;
-    font-size: 12.5px;
+    padding: 0 0 60px;
+    font-size: 14.5px;
     line-height: 1.5;
   }
 
-  .brand {
+  header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 18px;
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding-bottom: 12px;
-    margin-bottom: 16px;
-    border-bottom: 1px solid var(--line);
+    align-items: center;
+    gap: 10px;
   }
-  .brand h1 {
-    font-size: 13px;
-    margin: 0;
-    letter-spacing: 0.04em;
-    color: var(--text);
-    font-weight: 600;
+  header .logo {
+    width: 30px; height: 30px;
+    background: var(--primary);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 14px;
+    flex-shrink: 0;
   }
-  .brand .sub {
-    font-size: 9.5px;
-    color: var(--dim);
-    letter-spacing: 0.08em;
+  header h1 { font-size: 15px; margin: 0; font-weight: 700; }
+  header .sub { font-size: 11px; color: var(--dim); }
+
+  .content { padding: 20px 18px 0; }
+
+  .ad-slot {
+    background: #eef2f7;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 14px;
+    letter-spacing: 0.03em;
   }
 
   .card {
     background: var(--panel);
-    border: 1px solid var(--line);
-    padding: 16px;
-    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.05);
   }
 
   .eyebrow {
-    font-size: 9.5px;
-    letter-spacing: 0.1em;
-    color: var(--dim);
-    margin-bottom: 8px;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    font-weight: 700;
     text-transform: uppercase;
+    margin-bottom: 12px;
   }
 
-  .hero h2 {
-    font-size: 17px;
-    line-height: 1.3;
-    margin: 0 0 10px;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .hero p {
-    color: var(--dim);
-    font-size: 11.5px;
-    line-height: 1.6;
-    margin: 0 0 16px;
-  }
-  .field-label {
-    font-size: 9.5px;
-    color: var(--dim);
-    letter-spacing: 0.06em;
-    margin-bottom: 5px;
-  }
-
-  .mode-row { display: flex; gap: 6px; margin-bottom: 4px; }
-  .mode-btn {
-    flex: 1;
-    background: transparent;
-    border: 1px solid var(--line);
-    color: var(--dim);
-    padding: 8px;
-    font-family: inherit;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-  }
-  .mode-btn.active { border-color: var(--ice); color: var(--ice); }
-  .mode-desc { font-size: 9.5px; color: var(--dim); margin-bottom: 12px; }
+  .hero h2 { font-size: 20px; line-height: 1.4; margin: 0 0 10px; font-weight: 700; }
+  .hero p { color: var(--dim); font-size: 13px; line-height: 1.65; margin: 0 0 20px; }
+  .field-label { font-size: 11.5px; color: var(--dim); font-weight: 600; margin-bottom: 7px; margin-top: 4px; }
 
   #url {
     width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    padding: 11px 12px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 13px 14px;
     color: var(--text);
+    font-family: var(--mono);
+    font-size: 13.5px;
+    outline: none;
+    margin-bottom: 16px;
+  }
+  #url::placeholder { color: #94a3b8; }
+  #url:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(29,78,216,0.1); }
+
+  .mode-row { display: flex; gap: 8px; margin-bottom: 6px; }
+  .mode-btn {
+    flex: 1;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    color: var(--dim);
+    border-radius: 8px;
+    padding: 9px;
     font-family: inherit;
     font-size: 12px;
-    outline: none;
-    margin-bottom: 10px;
+    font-weight: 600;
+    cursor: pointer;
   }
-  #url::placeholder { color: var(--dim); }
-  #url:focus { border-color: var(--ice); }
+  .mode-btn.active { border-color: var(--primary); color: var(--primary); background: #eff4ff; }
+  .mode-desc { font-size: 11.5px; color: var(--dim); margin-bottom: 20px; line-height: 1.5; }
 
   .btn {
     width: 100%;
-    border: 1px solid var(--line);
-    padding: 11px;
-    font-weight: 600;
-    font-size: 11px;
-    letter-spacing: 0.05em;
+    border: none;
+    border-radius: 9px;
+    padding: 14px;
+    font-weight: 700;
+    font-size: 14px;
     cursor: pointer;
     font-family: inherit;
-    background: transparent;
-    color: var(--text);
   }
-  .btn-start { background: var(--ice); color: #05141a; border-color: var(--ice); margin-bottom: 6px; }
-  .btn-start:disabled { opacity: 0.3; }
-  .btn-stop { color: var(--dim); }
+  .btn-start { background: var(--primary); color: #fff; margin-bottom: 10px; }
+  .btn-start:hover { background: var(--primary-dark); }
+  .btn-start:disabled { opacity: 0.4; cursor: default; }
+  .btn-stop { background: #fff; border: 1.5px solid var(--border); color: var(--dim); }
 
   .agent-grid {
-    display: flex;
-    justify-content: space-between;
-    font-size: 9.5px;
-    color: var(--dim);
-    letter-spacing: 0.05em;
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--dim); font-weight: 600;
     margin-bottom: 4px;
   }
-  .agent-grid .val { color: var(--text); font-size: 11px; margin-top: 3px; }
+  .agent-grid .val { color: var(--text); font-size: 12.5px; margin-top: 3px; font-family: var(--mono); }
 
-  .radar-wrap { display: flex; justify-content: center; margin: 16px 0 2px; }
-  .radar {
-    position: relative;
-    width: 170px; height: 170px;
-    border-radius: 50%;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    overflow: hidden;
+  .progress-wrap { display: flex; justify-content: center; margin: 16px 0 4px; }
+  .progress-ring { position: relative; width: 132px; height: 132px; }
+  .progress-ring svg { transform: rotate(-90deg); }
+  .progress-ring circle { fill: none; stroke-width: 9; }
+  .progress-ring .track { stroke: #eef2f7; }
+  .progress-ring .fill { stroke: var(--primary); stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+  .progress-ring .center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
   }
-  .ring { position: absolute; border: 1px solid rgba(127,184,201,0.12); border-radius: 50%; }
-  .ring.r1 { inset: 18%; } .ring.r2 { inset: 36%; } .ring.r3 { inset: 54%; }
-  .cross { position: absolute; background: rgba(127,184,201,0.12); }
-  .cross.h { top: 50%; left: 0; right: 0; height: 1px; }
-  .cross.v { left: 50%; top: 0; bottom: 0; width: 1px; }
-  .needle {
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 50%; height: 1px;
-    background: linear-gradient(90deg, var(--ice), transparent);
-    transform-origin: 0% 50%;
-    animation: sweep 3.6s linear infinite;
-  }
-  @keyframes sweep { to { transform: rotate(360deg); } }
-  .center-dot {
-    position: absolute; top: 50%; left: 50%;
-    width: 5px; height: 5px; margin: -2.5px;
-    background: var(--ice);
-  }
+  .progress-ring .center .n { font-size: 26px; font-weight: 800; color: var(--text); }
+  .progress-ring .center .l { font-size: 9.5px; color: var(--dim); font-weight: 600; letter-spacing: 0.05em; }
 
-  .elapsed { text-align: center; font-size: 10px; color: var(--dim); margin-top: 8px; letter-spacing: 0.04em; }
-  .elapsed b { color: var(--text); }
+  .elapsed { text-align: center; font-size: 11px; color: var(--dim); margin-top: 10px; font-weight: 600; }
+  .elapsed b { color: var(--text); font-family: var(--mono); }
 
-  .pipeline-pct { font-size: 22px; color: var(--text); margin: 4px 0 10px; font-weight: 600; }
-  .bar-track { height: 2px; background: var(--line); overflow: hidden; margin-bottom: 8px; }
-  .bar-fill { height: 100%; width: 0%; background: var(--ice); transition: width 0.4s ease; }
-  .status-line { font-size: 10px; color: var(--dim); margin-bottom: 12px; }
+  .pipeline-pct { font-size: 24px; color: var(--primary); margin: 4px 0 10px; font-weight: 800; }
+  .bar-track { height: 6px; background: #eef2f7; border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+  .bar-fill { height: 100%; width: 0%; background: var(--primary); border-radius: 3px; transition: width 0.4s ease; }
+  .status-line { font-size: 12px; color: var(--dim); margin-bottom: 14px; }
   .stages { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .stage {
-    border: 1px solid var(--line);
-    padding: 7px 9px;
-    font-size: 9px;
-    letter-spacing: 0.05em;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 10.5px;
+    font-weight: 700;
     color: var(--dim);
+    background: #fff;
   }
-  .stage.active { border-color: var(--ice); color: var(--ice); }
-  .stage.done { color: var(--text); }
-  .stage.done::after { content: " · TAMAM"; color: var(--dim); }
+  .stage.active { border-color: var(--primary); color: var(--primary); background: #eff4ff; }
+  .stage.done { color: var(--safe); border-color: #bbf7d0; background: #f0fdf4; }
+  .stage.done::after { content: " ✓"; }
 
   .term-hdr { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
-  .term-hdr .dot { width: 4px; height: 4px; background: var(--ice); animation: blink 1.4s ease-in-out infinite; }
+  .term-hdr .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--safe); animation: blink 1.4s ease-in-out infinite; }
   @keyframes blink { 50% { opacity: 0.2; } }
-  .term-hdr span { font-size: 9.5px; color: var(--dim); letter-spacing: 0.08em; }
+  .term-hdr span { font-size: 11px; color: var(--dim); font-weight: 700; letter-spacing: 0.03em; }
   #terminal {
-    background: #020304;
-    border: 1px solid var(--line);
-    padding: 11px;
-    font-size: 10.5px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
     line-height: 1.8;
     min-height: 80px;
     max-height: 200px;
     overflow-y: auto;
   }
   #terminal .l { color: var(--dim); }
-  #terminal .l .tag { color: var(--ice); }
-  #terminal .l.warn .tag { color: var(--amber); }
+  #terminal .l .tag { color: var(--primary); font-weight: 700; }
+  #terminal .l.warn .tag { color: var(--mid); }
   #terminal .l.bad .tag { color: var(--danger); }
 
-  h3.section-title { font-size: 13px; margin: 3px 0 10px; font-weight: 600; color: var(--text); }
-  .modules { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  h3.section-title { font-size: 15px; margin: 2px 0 12px; font-weight: 700; color: var(--text); }
+  .modules { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
   .module {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    padding: 12px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 11px;
+    padding: 15px 16px;
   }
-  .module.active { border-color: var(--ice); }
-  .module .mrow { display: flex; justify-content: space-between; font-size: 9px; color: var(--dim); margin-bottom: 7px; letter-spacing: 0.04em; }
-  .module .mstatus.done { color: var(--ice); }
-  .module .mstatus.active { color: var(--amber); }
-  .module h4 { font-size: 12px; margin: 0 0 3px; color: var(--text); font-weight: 600; }
-  .module p { font-size: 10.5px; color: var(--dim); margin: 0; }
-  .module .result { margin-top: 7px; font-size: 10.5px; color: var(--text); }
+  .module.active { border-color: var(--primary); background: #fafcff; }
+  .module .mrow { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); margin-bottom: 6px; font-weight: 700; }
+  .module .mstatus.done { color: var(--safe); }
+  .module .mstatus.active { color: var(--mid); }
+  .module h4 { font-size: 13px; margin: 0 0 3px; color: var(--text); font-weight: 700; }
+  .module p { font-size: 11.5px; color: var(--dim); margin: 0; }
+  .module .result { margin-top: 7px; font-size: 11.5px; color: var(--text); font-family: var(--mono); }
 
   .score-row { display: flex; align-items: baseline; gap: 6px; margin: 8px 0 4px; }
-  .score-num { font-size: 34px; font-weight: 700; color: var(--text); }
-  .score-den { font-size: 12px; color: var(--dim); }
-  .score-label { font-size: 9.5px; color: var(--dim); letter-spacing: 0.08em; margin-bottom: 3px; }
+  .score-num { font-size: 40px; font-weight: 800; color: var(--text); }
+  .score-den { font-size: 13px; color: var(--dim); }
+  .score-label { font-size: 11px; color: var(--dim); font-weight: 700; margin-bottom: 3px; }
   .verdict-badge {
     display: inline-block;
-    border: 1px solid var(--line);
-    padding: 4px 10px;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    margin-top: 6px;
-    color: var(--dim);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 8px;
+    background: #f1f5f9; color: var(--dim);
   }
-  .verdict-badge.ok { border-color: var(--ice); color: var(--ice); }
-  .verdict-badge.mid { border-color: var(--amber); color: var(--amber); }
-  .verdict-badge.bad { border-color: var(--danger); color: var(--danger); }
+  .verdict-badge.ok { background: #dcfce7; color: var(--safe); }
+  .verdict-badge.mid { background: #fef3c7; color: var(--mid); }
+  .verdict-badge.bad { background: #fee2e2; color: var(--danger); }
 
-  .reco { margin-top: 14px; }
+  .reco { margin-top: 16px; }
   .reco .eyebrow { margin-bottom: 6px; }
-  .reco ul { margin: 0; padding-left: 14px; font-size: 10.5px; color: var(--dim); line-height: 1.7; }
+  .reco ul { margin: 0; padding-left: 18px; font-size: 12px; color: var(--dim); line-height: 1.8; }
 
-  .disclaimer { font-size: 10px; color: var(--dim); line-height: 1.6; }
+  .disclaimer { font-size: 11.5px; color: var(--dim); line-height: 1.6; background: #fffbeb; border-color: #fde68a; }
+  .disclaimer .eyebrow { color: var(--mid); }
 
-  .hist-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 10.5px; }
+  .hist-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .hist-row:last-child { border-bottom: none; }
+
+  footer {
+    text-align: center;
+    padding: 20px 18px 10px;
+    font-size: 11px;
+    color: #94a3b8;
+  }
+  footer a { color: var(--dim); }
 </style>
 </head>
 <body>
 
-  <div class="brand">
-    <h1>BU SİTE GÜVENLİ Mİ?</h1>
-    <div class="sub">GÜVENLİK TARAMA ARACI</div>
-  </div>
+  <header>
+    <div class="logo">S</div>
+    <div>
+      <h1>Bu Site Güvenli mi?</h1>
+      <div class="sub">Ücretsiz web güvenlik tarama aracı</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+  <div class="ad-slot">Reklam Alanı</div>
 
   <div class="card hero">
-    <div class="eyebrow">HEDEF</div>
+    <div class="eyebrow">Hedef</div>
     <h2>Site adresini gir, taransın.</h2>
-    <p>Bağlantı, DNS, sertifika, başlık, çerez, form ve kaynak sinyalleri incelenir. Sonuç bir tahmindir, kesin garanti değildir.</p>
-    <div class="field-label">ADRES</div>
+    <p>Bağlantı, DNS, sertifika, başlık, çerez, form ve kaynak sinyalleri incelenir. Sonuç bir değerlendirmedir, kesin garanti değildir.</p>
+    <div class="field-label">Adres</div>
     <input id="url" placeholder="https://ornek.com" autocomplete="off" />
-    <div class="field-label" style="margin-top:2px;">MOD</div>
+    <div class="field-label" style="margin-top:2px;">Tarama modu</div>
     <div class="mode-row">
-      <button class="mode-btn active" id="modeHizli" onclick="setMode('temel')">HIZLI</button>
-      <button class="mode-btn" id="modeKapsamli" onclick="setMode('kapsamli')">KAPSAMLI</button>
+      <button class="mode-btn active" id="modeHizli" onclick="setMode('temel')">Hızlı</button>
+      <button class="mode-btn" id="modeKapsamli" onclick="setMode('kapsamli')">Kapsamlı</button>
     </div>
     <div class="mode-desc" id="modeDesc">Temel kontroller, birkaç saniye sürer.</div>
-    <button class="btn btn-start" id="startBtn" onclick="startScan()">TARAMAYI BAŞLAT</button>
-    <button class="btn btn-stop" id="stopBtn" onclick="stopScan()">DURDUR</button>
+    <button class="btn btn-start" id="startBtn" onclick="startScan()">Taramayı Başlat</button>
+    <button class="btn btn-stop" id="stopBtn" onclick="stopScan()" style="display:none;">Taramayı Durdur</button>
   </div>
 
   <div class="card">
-    <div class="eyebrow">DURUM</div>
-    <h3 class="section-title" id="agentTitle" style="margin-bottom:12px;">Hedef bekleniyor</h3>
+    <div class="eyebrow">Durum</div>
+    <h3 class="section-title" id="agentTitle" style="margin-bottom:14px;">Hedef bekleniyor</h3>
     <div class="agent-grid">
       <div><div>HEDEF</div><div class="val" id="targetVal">—</div></div>
       <div style="text-align:right;"><div>TARAMA NO</div><div class="val" id="scanIdVal">—</div></div>
     </div>
-    <div class="radar-wrap">
-      <div class="radar">
-        <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
-        <div class="cross h"></div><div class="cross v"></div>
-        <div class="needle"></div>
-        <div class="center-dot"></div>
+    <div class="progress-wrap">
+      <div class="progress-ring">
+        <svg width="132" height="132">
+          <circle class="track" cx="66" cy="66" r="56"></circle>
+          <circle class="fill" id="ringFill" cx="66" cy="66" r="56" stroke-dasharray="352" stroke-dashoffset="352"></circle>
+        </svg>
+        <div class="center">
+          <div class="n" id="ringPct">0%</div>
+          <div class="l">TARAMA</div>
+        </div>
       </div>
     </div>
     <div class="elapsed">SÜRE &nbsp;<b id="elapsedVal">00:00</b></div>
-  </div>
-
-  <div class="card">
-    <div class="eyebrow">İLERLEME</div>
-    <h3 class="section-title">Tarama akışı</h3>
-    <div class="pipeline-pct"><span id="pct">0</span>%</div>
-    <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
-    <div class="status-line" id="statusLine">Başlatılmadı.</div>
+    <div class="status-line" id="statusLine" style="text-align:center;margin-top:14px;margin-bottom:10px;">Başlatılmadı.</div>
     <div class="stages" id="stages">
-      <div class="stage" data-s="init">BAŞLANGIÇ</div>
-      <div class="stage" data-s="net">AĞ</div>
-      <div class="stage" data-s="sec">GÜVENLİK</div>
-      <div class="stage" data-s="ana">ANALİZ</div>
-      <div class="stage" data-s="rep">RAPOR</div>
+      <div class="stage" data-s="init">Başlangıç</div>
+      <div class="stage" data-s="net">Ağ</div>
+      <div class="stage" data-s="sec">Güvenlik</div>
+      <div class="stage" data-s="ana">Analiz</div>
+      <div class="stage" data-s="rep">Rapor</div>
     </div>
+    <div style="display:none;"><span id="pct">0</span><div class="bar-fill" id="barFill"></div></div>
   </div>
 
   <div class="card">
-    <div class="term-hdr"><span class="dot"></span><span>KAYIT</span></div>
+    <div class="term-hdr"><span class="dot"></span><span>Kayıt</span></div>
     <div id="terminal"><div class="l"><span class="tag">[SİSTEM]</span> hazır, tarama bekleniyor.</div></div>
   </div>
 
   <div class="card">
-    <div class="eyebrow">MODÜLLER</div>
+    <div class="eyebrow">Modüller</div>
     <h3 class="section-title">Kontrol listesi</h3>
     <div class="modules" id="modules"></div>
   </div>
 
   <div class="card">
-    <div class="eyebrow">SONUÇ</div>
+    <div class="eyebrow">Sonuç</div>
     <h3 class="section-title">Değerlendirme</h3>
     <div class="score-label">GÜVEN SKORU</div>
     <div class="score-row"><span class="score-num" id="finalScore">—</span><span class="score-den">/100</span></div>
-    <div class="verdict-badge" id="verdictBadge">BEKLİYOR</div>
-    <p id="finalText" style="font-size:10.5px;color:var(--dim);margin-top:12px;line-height:1.6;">Tarama başlatılınca sonuç burada görünecek.</p>
+    <div class="verdict-badge" id="verdictBadge">Bekliyor</div>
+    <p id="finalText" style="font-size:12px;color:var(--dim);margin-top:12px;line-height:1.6;">Tarama başlatılınca sonuç burada görünecek.</p>
     <div class="reco">
-      <div class="eyebrow">ÖNERİLER</div>
-      <ul id="recoList"><li style="list-style:none;margin-left:-14px;color:var(--dim);">Henüz yok.</li></ul>
+      <div class="eyebrow">Öneriler</div>
+      <ul id="recoList"><li style="list-style:none;margin-left:-18px;color:var(--dim);">Henüz yok.</li></ul>
     </div>
   </div>
 
   <div class="card">
-    <div class="eyebrow">GEÇMİŞ</div>
+    <div class="eyebrow">Geçmiş</div>
     <h3 class="section-title">Önceki taramalar</h3>
-    <div id="historyList" style="font-size:10.5px;color:var(--dim);">Kayıt yok.</div>
+    <div id="historyList" style="font-size:12px;color:var(--dim);">Kayıt yok.</div>
   </div>
 
-  <div class="card disclaimer">
-    <div class="eyebrow">NOT</div>
-    Bu araç sınırlı ve pasif kontroller yapar. Düşük risk sonucu, sitenin tamamen güvenli olduğu anlamına gelmez.
   </div>
+
+  <footer>
+    Bu Site Güvenli mi? · <a href="/gizlilik-politikasi.html">Gizlilik Politikası</a>
+  </footer>
 
 <script>
   const MODULES_BASE = [
@@ -374,7 +379,7 @@
       div.className = 'module';
       div.id = 'mod-' + m.id;
       div.innerHTML = `
-        <div class="mrow"><span>${m.n}</span><span class="mstatus">BEKLİYOR</span></div>
+        <div class="mrow"><span>${m.n}</span><span class="mstatus">Bekliyor</span></div>
         <h4>${m.title}</h4>
         <p>${m.desc}</p>
         <div class="result" style="display:none;"></div>`;
@@ -400,6 +405,8 @@
   let scanId = null;
   let currentES = null;
 
+  const RING_CIRC = 352;
+
   function log(text, cls) {
     const term = document.getElementById('terminal');
     const row = document.createElement('div');
@@ -417,9 +424,10 @@
 
   function setModule(id, state, resultText) {
     const el = document.getElementById('mod-' + id);
+    if (!el) return;
     const status = el.querySelector('.mstatus');
     status.className = 'mstatus' + (state ? ' ' + state : '');
-    status.textContent = state === 'active' ? 'ÇALIŞIYOR' : state === 'done' ? 'TAMAM' : 'BEKLİYOR';
+    status.textContent = state === 'active' ? 'Çalışıyor' : state === 'done' ? 'Tamam' : 'Bekliyor';
     el.classList.toggle('active', state === 'active');
     if (resultText) {
       const r = el.querySelector('.result');
@@ -431,6 +439,9 @@
   function pct(v) {
     document.getElementById('pct').textContent = v;
     document.getElementById('barFill').style.width = v + '%';
+    document.getElementById('ringPct').textContent = v + '%';
+    const offset = RING_CIRC - (RING_CIRC * v / 100);
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
   }
 
   function startElapsed() {
@@ -449,6 +460,8 @@
     clearInterval(elapsedTimer);
     log('tarama durduruldu.', 'warn');
     document.getElementById('startBtn').disabled = false;
+    document.getElementById('startBtn').style.display = 'block';
+    document.getElementById('stopBtn').style.display = 'none';
   }
 
   async function startScan() {
@@ -457,13 +470,14 @@
     scanning = true;
     scanId = Math.random().toString(36).slice(2, 8);
 
-    document.getElementById('startBtn').disabled = true;
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'block';
     document.getElementById('agentTitle').textContent = 'Taranıyor';
     document.getElementById('targetVal').textContent = url;
     document.getElementById('scanIdVal').textContent = scanId;
     document.getElementById('terminal').innerHTML = '';
     document.getElementById('finalScore').textContent = '—';
-    document.getElementById('verdictBadge').textContent = 'ÇALIŞIYOR';
+    document.getElementById('verdictBadge').textContent = 'Çalışıyor';
     document.getElementById('verdictBadge').className = 'verdict-badge';
     startElapsed();
 
@@ -472,9 +486,11 @@
     const MODULE_STAGE = {
       domain: 'net', dns: 'net', tls: 'sec', http: 'net', redirect: 'net',
       headers: 'sec', cookies: 'sec', forms: 'ana', js: 'ana',
-      resources: 'ana', privacy: 'ana', sitemap: 'ana', threat: 'rep'
+      resources: 'ana', privacy: 'ana', sitemap: 'ana', threat: 'rep', virustotal: 'sec',
+      robots: 'ana', subdomains: 'ana', email_security: 'ana', crawl: 'ana'
     };
     let doneCount = 0;
+    const totalModules = currentMode === 'kapsamli' ? 18 : 14;
 
     const es = new EventSource('/api/check-stream?url=' + encodeURIComponent(url) + '&level=' + currentMode);
     currentES = es;
@@ -492,7 +508,7 @@
       if (stg) setStage(stg, 'active');
       setModule(d.id, 'done', d.result);
       doneCount++;
-      pct(Math.min(10 + Math.round((doneCount / 13) * 80), 90));
+      pct(Math.min(10 + Math.round((doneCount / totalModules) * 80), 90));
     });
 
     es.addEventListener('final', (e) => {
@@ -502,9 +518,9 @@
 
       document.getElementById('finalScore').textContent = d.score;
       const badge = document.getElementById('verdictBadge');
-      if (d.score >= 70) { badge.textContent = 'GÜVENİLİR'; badge.className = 'verdict-badge ok'; }
-      else if (d.score >= 40) { badge.textContent = 'ŞÜPHELİ'; badge.className = 'verdict-badge mid'; }
-      else { badge.textContent = 'RİSKLİ'; badge.className = 'verdict-badge bad'; }
+      if (d.score >= 70) { badge.textContent = 'Güvenilir'; badge.className = 'verdict-badge ok'; }
+      else if (d.score >= 40) { badge.textContent = 'Şüpheli'; badge.className = 'verdict-badge mid'; }
+      else { badge.textContent = 'Riskli'; badge.className = 'verdict-badge bad'; }
 
       document.getElementById('finalText').textContent =
         `${d.hostname} için tarama tamamlandı. Skor: ${d.score}/100.`;
@@ -534,6 +550,8 @@
       es.close();
       scanning = false;
       document.getElementById('startBtn').disabled = false;
+      document.getElementById('startBtn').style.display = 'block';
+      document.getElementById('stopBtn').style.display = 'none';
     });
 
     es.addEventListener('error', (e) => {
@@ -544,6 +562,8 @@
       es.close();
       scanning = false;
       document.getElementById('startBtn').disabled = false;
+      document.getElementById('startBtn').style.display = 'block';
+      document.getElementById('stopBtn').style.display = 'none';
       clearInterval(elapsedTimer);
     });
   }
